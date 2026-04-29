@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@layer base {
+    button, 
+    a, 
+    [role="button"],
+    [wire\:click] {
+        cursor: pointer !important;
+    }
+}
