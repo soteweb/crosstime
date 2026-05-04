@@ -49,6 +49,11 @@ class MenuAdmin extends Component
 
     public function store()
     {
+        // Normalize target: checkbox sends false when unchecked
+        if (!$this->target || $this->target === false || $this->target === '0') {
+            $this->target = '_self';
+        }
+
         $this->validate([
             'name' => 'required|string|max:255',
             'url' => 'required|string|max:255',
