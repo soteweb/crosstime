@@ -12,12 +12,8 @@ class MigracionXmlWordPressSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Limpieza de tablas (Añadido truncate de event_types para automatización total)
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        DB::table('event_categories')->truncate();
-        DB::table('events')->truncate();
-        DB::table('event_types')->truncate(); // <--- Limpiamos tipos para regenerarlos del XML
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        // 1. Limpieza de tablas (compatible con PostgreSQL)
+        DB::statement('TRUNCATE TABLE event_categories, events, event_types RESTART IDENTITY CASCADE;');
 
         // 2. Ruta del XML
         $xmlPath = database_path('data/itapuacross.WordPress.2026-04-23.xml');
