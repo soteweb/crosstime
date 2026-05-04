@@ -26,52 +26,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8" x-data="{
-        initEditor() {
-            if (typeof tinymce !== 'undefined') {
-                tinymce.init({
-                    selector: '#event-description-editor',
-                    plugins: 'code lists link image table fullscreen autolink media searchreplace wordcount',
-                    toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist | link image media | table | code fullscreen',
-                    extended_valid_elements: '*[*]',
-                    promotion: false,
-                    branding: false,
-                    min_height: 400,
-                    images_upload_url: '{{ route('admin.upload-image') }}',
-                    images_upload_credentials: true,
-                    automatic_uploads: true,
-                    file_picker_types: 'image',
-                    images_upload_handler: function (blobInfo, progress) {
-                        return new Promise(function (resolve, reject) {
-                            var xhr = new XMLHttpRequest();
-                            xhr.open('POST', '{{ route('admin.upload-image') }}');
-                            xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').content);
-                            xhr.upload.onprogress = function (e) {
-                                progress(e.loaded / e.total * 100);
-                            };
-                            xhr.onload = function () {
-                                if (xhr.status === 200) {
-                                    var json = JSON.parse(xhr.responseText);
-                                    resolve(json.location);
-                                } else {
-                                    reject('Error al subir: ' + xhr.status);
-                                }
-                            };
-                            xhr.onerror = function () { reject('Error de red'); };
-                            var formData = new FormData();
-                            formData.append('file', blobInfo.blob(), blobInfo.filename());
-                            xhr.send(formData);
-                        });
-                    },
-                    setup: function (editor) {
-                        editor.on('input change blur', function () {
-                            @this.set('description', editor.getContent());
-                        });
-                    }
-                });
-            }
-        }
-    }" x-init="initEditor()">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8" x-data x-init="initEventEditor()">
     
         <!-- Left Wide Column: Main Content -->
         <div class="lg:col-span-3 space-y-6">
@@ -366,3 +321,53 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+function initEventEditor() {
+    if (typeof tinymce === 'undefined') return;
+    tinymce.remove('#event-description-editor');
+    tinymce.init({
+        selector: '#event-description-editor',
+        plugins: 'code lists link image table fullscreen autolink media searchreplace wordcount',
+        toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist | link image media | table | code fullscreen',
+        extended_valid_elements: '*[*]',
+        promotion: false,
+        branding: false,
+        min_height: 400,
+        images_upload_url: '{{ route("admin.upload-image") }}',
+        images_upload_credentials: true,
+        automatic_uploads: true,
+        file_picker_types: 'image',
+        images_upload_handler: function (blobInfo, progress) {
+            return new Promise(function (resolve, reject) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '{{ route("admin.upload-image") }}');
+                var token = document.querySelector('meta[name="csrf-token"]');
+                if (token) xhr.setRequestHeader('X-CSRF-TOKEN', token.content);
+                xhr.upload.onprogress = function (e) {
+                    progress(e.loaded / e.total * 100);
+                };
+                xhr.onload = function () {
+                    if (xhr.status === 200) {
+                        resolve(JSON.parse(xhr.responseText).location);
+                    } else {
+                        reject('Error al subir: ' + xhr.status);
+                    }
+                };
+                xhr.onerror = function () { reject('Error de red'); };
+                var formData = new FormData();
+                formData.append('file', blobInfo.blob(), blobInfo.filename());
+                xhr.send(formData);
+            });
+        },
+        content_style: 'body { font-family: ui-sans-serif, system-ui, sans-serif; font-size: 16px; line-height: 1.6; color: #1f2937; padding: 1rem; } img { max-width: 100%; height: auto; } p { margin-bottom: 1rem; }',
+        setup: function (editor) {
+            editor.on('input change blur', function () {
+                @this.set('description', editor.getContent());
+            });
+        }
+    });
+}
+</script>
+@endpush
