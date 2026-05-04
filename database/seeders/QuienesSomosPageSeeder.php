@@ -4,11 +4,13 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Page;
+use App\Models\MenuItem;
 
 class QuienesSomosPageSeeder extends Seeder
 {
     public function run(): void
     {
+        // ── 1. Crear / actualizar la página ────────────────────────────────────
         $content = <<<'HTML'
 <div style="text-align: center; margin-bottom: 2.5rem;">
     <img src="/storage/pages/quienes-somos-banner.png"
@@ -90,6 +92,34 @@ HTML;
                 'slug'      => 'quienes-somos',
                 'content'   => $content,
                 'is_active' => true,
+            ]
+        );
+
+        // ── 2. Crear ítem de menú en Header ────────────────────────────────────
+        $headerMax = MenuItem::where('placement', 'header')->max('order') ?? 0;
+
+        MenuItem::updateOrCreate(
+            ['url' => '/quienes-somos', 'placement' => 'header'],
+            [
+                'name'      => 'Quiénes Somos',
+                'url'       => '/quienes-somos',
+                'placement' => 'header',
+                'order'     => $headerMax + 1,
+                'target'    => '_self',
+            ]
+        );
+
+        // ── 3. Crear ítem de menú en Footer ────────────────────────────────────
+        $footerMax = MenuItem::where('placement', 'footer')->max('order') ?? 0;
+
+        MenuItem::updateOrCreate(
+            ['url' => '/quienes-somos', 'placement' => 'footer'],
+            [
+                'name'      => 'Quiénes Somos',
+                'url'       => '/quienes-somos',
+                'placement' => 'footer',
+                'order'     => $footerMax + 1,
+                'target'    => '_self',
             ]
         );
     }
