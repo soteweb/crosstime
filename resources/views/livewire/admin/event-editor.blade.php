@@ -199,7 +199,7 @@
                                     <div class="space-y-3">
                                         @foreach(['Efectivo', 'Transferencia', 'Giros', 'Otro'] as $method)
                                             <label class="flex items-center cursor-pointer group">
-                                                <input type="checkbox" wire:model="payment_methods" value="{{ $method }}" class="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500">
+                                                <input type="checkbox" wire:model.live="payment_methods" value="{{ $method }}" class="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500">
                                                 <span class="ml-3 text-sm font-bold text-gray-700 group-hover:text-orange-600 transition-colors">{{ $method }}</span>
                                             </label>
                                         @endforeach
@@ -226,12 +226,20 @@
                                 </div>
                             </div>
 
-                            <!-- Payment Instructions -->
-                            <div class="p-6 bg-white rounded-xl border border-gray-200 shadow-sm mt-6">
-                                <h4 class="text-sm font-black text-gray-900 uppercase tracking-widest mb-4">Instrucciones de Pago (Transferencia / Giros)</h4>
-                                <textarea wire:model="payment_instructions" rows="4" placeholder="Ej: Transferir a la cuenta ITAU 1234567, a nombre de Juan Pérez, CI 1.234.567" class="w-full rounded-xl border-gray-200 bg-gray-50 shadow-sm focus:border-orange-500 focus:ring-orange-500 font-medium p-4 text-sm"></textarea>
-                                <p class="text-[10px] text-gray-400 mt-2 font-bold uppercase tracking-widest">Este texto se mostrará al atleta cuando elija Transferencia o Giros.</p>
+                            <!-- Payment Instructions (shown only when Transferencia or Giros is selected) -->
+                            @if(in_array('Transferencia', $payment_methods) || in_array('Giros', $payment_methods))
+                            <div class="animate-fadeIn p-6 bg-blue-50 rounded-xl border border-blue-200 shadow-sm mt-6">
+                                <div class="flex items-center mb-3">
+                                    <svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <h4 class="text-sm font-black text-blue-900 uppercase tracking-widest">
+                                        Instrucciones para
+                                        {{ implode(' / ', array_filter(['Transferencia', 'Giros'], fn($m) => in_array($m, $payment_methods))) }}
+                                    </h4>
+                                </div>
+                                <textarea wire:model="payment_instructions" rows="5" placeholder="Ej: Transferir al Banco ITAÚ, Cuenta Corriente Nro. 1234567, a nombre de Juan Pérez, CI 1.234.567. Enviar comprobante al WhatsApp 0981-000000." class="w-full rounded-xl border-blue-200 bg-white shadow-sm focus:border-blue-500 focus:ring-blue-500 font-medium p-4 text-sm"></textarea>
+                                <p class="text-[10px] text-blue-500 mt-2 font-bold uppercase tracking-widest">Este texto se mostrará al atleta cuando elija ese método de pago.</p>
                             </div>
+                            @endif
                         </div>
                     @endif
                 @endif
