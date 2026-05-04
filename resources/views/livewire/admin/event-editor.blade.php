@@ -37,6 +37,32 @@
                     promotion: false,
                     branding: false,
                     min_height: 400,
+                    images_upload_url: '{{ route('admin.upload-image') }}',
+                    images_upload_credentials: true,
+                    automatic_uploads: true,
+                    file_picker_types: 'image',
+                    images_upload_handler: function (blobInfo, progress) {
+                        return new Promise(function (resolve, reject) {
+                            var xhr = new XMLHttpRequest();
+                            xhr.open('POST', '{{ route('admin.upload-image') }}');
+                            xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').content);
+                            xhr.upload.onprogress = function (e) {
+                                progress(e.loaded / e.total * 100);
+                            };
+                            xhr.onload = function () {
+                                if (xhr.status === 200) {
+                                    var json = JSON.parse(xhr.responseText);
+                                    resolve(json.location);
+                                } else {
+                                    reject('Error al subir: ' + xhr.status);
+                                }
+                            };
+                            xhr.onerror = function () { reject('Error de red'); };
+                            var formData = new FormData();
+                            formData.append('file', blobInfo.blob(), blobInfo.filename());
+                            xhr.send(formData);
+                        });
+                    },
                     setup: function (editor) {
                         editor.on('input change blur', function () {
                             @this.set('description', editor.getContent());

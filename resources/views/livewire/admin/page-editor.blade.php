@@ -37,6 +37,32 @@
                     promotion: false,
                     branding: false,
                     min_height: 600,
+                    images_upload_url: '{{ route('admin.upload-image') }}',
+                    images_upload_credentials: true,
+                    automatic_uploads: true,
+                    file_picker_types: 'image',
+                    images_upload_handler: function (blobInfo, progress) {
+                        return new Promise(function (resolve, reject) {
+                            var xhr = new XMLHttpRequest();
+                            xhr.open('POST', '{{ route('admin.upload-image') }}');
+                            xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').content);
+                            xhr.upload.onprogress = function (e) {
+                                progress(e.loaded / e.total * 100);
+                            };
+                            xhr.onload = function () {
+                                if (xhr.status === 200) {
+                                    var json = JSON.parse(xhr.responseText);
+                                    resolve(json.location);
+                                } else {
+                                    reject('Error al subir: ' + xhr.status);
+                                }
+                            };
+                            xhr.onerror = function () { reject('Error de red'); };
+                            var formData = new FormData();
+                            formData.append('file', blobInfo.blob(), blobInfo.filename());
+                            xhr.send(formData);
+                        });
+                    },
                     content_style: `
                         body { font-family: ui-sans-serif, system-ui, sans-serif; font-size: 16px; line-height: 1.6; color: #1f2937; padding: 1rem; }
                         svg { max-width: 24px; max-height: 24px; display: inline-block; vertical-align: middle; fill: currentColor; }

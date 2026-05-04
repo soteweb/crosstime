@@ -30,6 +30,13 @@ Route::middleware(['auth'])->prefix('admin')->group(function() {
     Route::get('/athletes', Athletes::class)->name('admin.athletes');
     Route::get('/finanzas', \App\Livewire\Admin\FinanceReport::class)->name('admin.finance');
     Route::get('/usuarios', \App\Livewire\Admin\UsersAdmin::class)->name('admin.users');
+
+    // TinyMCE image upload endpoint
+    Route::post('/upload-image', function (\Illuminate\Http\Request $request) {
+        $request->validate(['file' => 'required|image|max:4096']);
+        $path = $request->file('file')->store('cms', 'public');
+        return response()->json(['location' => asset('storage/' . $path)]);
+    })->name('admin.upload-image');
 });
 Route::get('/events/{event}/register', EventRegistration::class)->name('events.register');
 Route::get('/eventos/{event}', \App\Livewire\EventShow::class)->name('event.show');
