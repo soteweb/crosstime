@@ -7,28 +7,17 @@ use App\Models\Event;
 
 class EventList extends Component
 {
-    public $showAll = false;
-
-    public function toggleShowAll()
-    {
-        $this->showAll = true;
-    }
-
     public function render()
     {
-        // Upcoming Events
-        $upcomingQuery = Event::with(['categories', 'eventType'])
+        // Upcoming Events (strict limit 6 for home)
+        $upcomingEvents = Event::with(['categories', 'eventType'])
             ->where('is_active', true)
             ->where('date', '>=', now()->startOfDay())
-            ->orderBy('date', 'asc');
-
-        $totalUpcoming = (clone $upcomingQuery)->count();
-
-        if (!$this->showAll) {
-            $upcomingQuery->limit(6);
-        }
-
-        $upcomingEvents = $upcomingQuery->get();
+            ->orderBy('date', 'asc')
+            ->limit(6)
+            ->get();
+            
+        $totalUpcoming = Event::where('is_active', true)->where('date', '>=', now()->startOfDay())->count();
 
         // Past Events (Results)
         $pastEvents = Event::with(['categories', 'eventType'])

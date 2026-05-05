@@ -42,5 +42,9 @@ Route::get('/events/{event}/register', EventRegistration::class)->name('events.r
 Route::get('/eventos/{event}', \App\Livewire\EventShow::class)->name('event.show');
 Route::get('/eventos/{event}/inscriptos', \App\Livewire\EventInscribedList::class)->name('event.inscriptos');
 
+// Paginated specific routes
+Route::get('/eventos-proximos', \App\Livewire\EventsUpcoming::class)->name('events.upcoming');
+Route::get('/resultados-pasados', \App\Livewire\EventsPast::class)->name('events.past');
+
 // CMS Dynamic Catch-All Route (must stay at the bottom)
 Route::get('/{slug}', \App\Livewire\PublicPage::class)->name('page.show');
