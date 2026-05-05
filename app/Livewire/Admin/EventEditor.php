@@ -133,6 +133,7 @@ class EventEditor extends Component
             'google_maps_url' => 'nullable|url',
             'registration_type' => 'required|in:local,external',
             'external_registration_url' => 'required_if:registration_type,external|nullable|url',
+            'registration_deadline' => 'nullable|date',
             'distances.*.name' => 'required_if:registration_type,local|string|max:255',
             'categories.*.name' => 'required_if:registration_type,local|string|max:255',
             'categories.*.price' => 'required_if:registration_type,local|numeric|min:0',
