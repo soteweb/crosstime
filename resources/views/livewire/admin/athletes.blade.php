@@ -82,22 +82,56 @@
                                         <p class="text-[10px] text-gray-500 font-medium uppercase tracking-tighter">{{ $reg->athlete->identity_document }} • {{ $reg->athlete->phone }}</p>
                                     </td>
                                     <td class="p-4">
-                                        <div class="relative" x-data="{ open: false }">
-                                            <button @click="open = !open" class="w-full">
+                                        <div x-data="{ open: false, btnRect: {} }">
+                                            <button
+                                                @click="btnRect = $el.getBoundingClientRect(); open = !open"
+                                                class="w-full group">
                                                 @if($reg->status === 'pre_inscribed')
-                                                    <span class="block bg-yellow-50 text-yellow-700 text-[10px] font-black px-2 py-1 rounded-lg border border-yellow-200 text-center uppercase tracking-tighter">Pre Inscripto</span>
+                                                    <span class="block bg-yellow-50 text-yellow-700 text-[10px] font-black px-2 py-1 rounded-lg border border-yellow-200 text-center uppercase tracking-tighter group-hover:bg-yellow-100 transition-colors">Pre Inscripto</span>
                                                 @elseif($reg->status === 'inscribed')
-                                                    <span class="block bg-blue-50 text-blue-700 text-[10px] font-black px-2 py-1 rounded-lg border border-blue-100 text-center uppercase tracking-tighter">Inscripto</span>
+                                                    <span class="block bg-blue-50 text-blue-700 text-[10px] font-black px-2 py-1 rounded-lg border border-blue-100 text-center uppercase tracking-tighter group-hover:bg-blue-100 transition-colors">Inscripto</span>
                                                 @else
-                                                    <span class="block bg-green-50 text-green-700 text-[10px] font-black px-2 py-1 rounded-lg border border-green-200 text-center uppercase tracking-tighter">Participante {{ $reg->bib_number ? '#' . $reg->bib_number : '' }}</span>
+                                                    <span class="block bg-green-50 text-green-700 text-[10px] font-black px-2 py-1 rounded-lg border border-green-200 text-center uppercase tracking-tighter group-hover:bg-green-100 transition-colors">Acreditado {{ $reg->bib_number ? '#' . $reg->bib_number : '' }}</span>
                                                 @endif
-                                                <p class="text-[9px] text-gray-400 font-bold mt-1 text-center uppercase">{{ $reg->payment_method }}</p>
+                                                <p class="text-[9px] text-gray-400 font-bold mt-1 text-center uppercase flex items-center justify-center gap-1">
+                                                    {{ $reg->payment_method }}
+                                                    <svg class="w-2.5 h-2.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/></svg>
+                                                </p>
                                             </button>
-                                            <div x-show="open" @click.away="open = false" class="absolute z-10 mt-1 w-32 bg-white rounded-xl shadow-xl border border-gray-100 py-1 overflow-hidden" x-cloak>
-                                                <button wire:click="changeStatus({{ $reg->id }}, 'pre_inscribed')" @click="open = false" class="w-full text-left px-3 py-2 text-[10px] font-bold text-yellow-600 hover:bg-yellow-50 uppercase">Pre Inscripto</button>
-                                                <button wire:click="openPayment({{ $reg->id }})" @click="open = false" class="w-full text-left px-3 py-2 text-[10px] font-bold text-blue-600 hover:bg-blue-50 uppercase">Validar Pago</button>
-                                                <button wire:click="changeStatus({{ $reg->id }}, 'participant')" @click="open = false" class="w-full text-left px-3 py-2 text-[10px] font-bold text-green-600 hover:bg-green-50 uppercase">Participante</button>
-                                            </div>
+
+                                            {{-- Fixed-position dropdown via teleport to avoid overflow clipping --}}
+                                            <template x-teleport="body">
+                                                <div
+                                                    x-show="open"
+                                                    x-cloak
+                                                    @click.away="open = false"
+                                                    :style="`position:fixed; top:${btnRect.bottom + 6}px; left:${btnRect.left}px; width:${Math.max(btnRect.width, 160)}px; z-index:9999;`"
+                                                    x-transition:enter="transition ease-out duration-150"
+                                                    x-transition:enter-start="opacity-0 scale-95"
+                                                    x-transition:enter-end="opacity-100 scale-100"
+                                                    x-transition:leave="transition ease-in duration-100"
+                                                    x-transition:leave-start="opacity-100 scale-100"
+                                                    x-transition:leave-end="opacity-0 scale-95"
+                                                    class="bg-white rounded-xl shadow-2xl border border-gray-100 py-1 overflow-hidden"
+                                                >
+                                                    <p class="px-3 pt-2 pb-1 text-[9px] font-black text-gray-300 uppercase tracking-widest">Cambiar estado</p>
+                                                    <button wire:click="changeStatus({{ $reg->id }}, 'pre_inscribed')" @click="open = false" class="w-full text-left px-3 py-2 text-[10px] font-bold text-yellow-600 hover:bg-yellow-50 uppercase flex items-center gap-2">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-yellow-400 inline-block"></span> Pre Inscripto
+                                                    </button>
+                                                    <button wire:click="openPayment({{ $reg->id }})" @click="open = false" class="w-full text-left px-3 py-2 text-[10px] font-bold text-blue-600 hover:bg-blue-50 uppercase flex items-center gap-2">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block"></span> Validar Pago
+                                                    </button>
+                                                    <button wire:click="changeStatus({{ $reg->id }}, 'participant')" @click="open = false" class="w-full text-left px-3 py-2 text-[10px] font-bold text-green-600 hover:bg-green-50 uppercase flex items-center gap-2">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-green-400 inline-block"></span> Acreditado
+                                                    </button>
+                                                    @if($reg->status === 'participant')
+                                                        <hr class="my-1 border-gray-100">
+                                                        <button wire:click="changeBib({{ $reg->id }})" @click="open = false" class="w-full text-left px-3 py-2 text-[10px] font-bold text-purple-600 hover:bg-purple-50 uppercase flex items-center gap-2">
+                                                            <span class="w-1.5 h-1.5 rounded-full bg-purple-400 inline-block"></span> Cambiar Dorsal
+                                                        </button>
+                                                    @endif
+                                                </div>
+                                            </template>
                                         </div>
                                     </td>
                                     <td class="p-4">
@@ -264,16 +298,23 @@
         @if($view === 'bib_assignment')
             <div class="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden animate-fadeIn max-w-2xl mx-auto">
                 <div class="bg-gray-900 p-8 text-white flex justify-between items-center">
-                    <h3 class="text-2xl font-black uppercase">Asignar Dorsal</h3>
+                    <div>
+                        <h3 class="text-2xl font-black uppercase">{{ $bibIsEdit ? 'Cambiar Dorsal' : 'Asignar Dorsal' }}</h3>
+                        <p class="text-xs text-gray-400 mt-1">{{ $bibIsEdit ? 'Corrige el número de dorsal ya asignado' : 'Confirma para registrar entrega de kit' }}</p>
+                    </div>
                     <button wire:click="cancel" class="text-gray-400 hover:text-white transition-colors"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                 </div>
                 <div class="p-12 text-center space-y-6">
                     <input type="text" wire:model="bib_number" autofocus placeholder="DORSAL" class="w-full text-center text-7xl font-black rounded-3xl border-gray-200 bg-gray-50 p-6 text-gray-900 shadow-inner">
-                    <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">Confirma para registrar entrega de kit</p>
+                    @if($bibIsEdit)
+                        <p class="text-sm font-bold text-orange-500 uppercase tracking-widest">⚠️ El atleta ya fue acreditado — se actualizará el número</p>
+                    @else
+                        <p class="text-sm font-bold text-gray-400 uppercase tracking-widest">Confirma para registrar entrega de kit</p>
+                    @endif
                 </div>
                 <div class="p-6 bg-gray-50 border-t border-gray-100 flex gap-4">
                     <button wire:click="cancel" class="flex-1 py-3 text-gray-500 font-bold uppercase tracking-widest text-[10px]">Cancelar</button>
-                    <button wire:click="saveBibNumber" class="flex-[2] py-3 bg-gradient-to-b from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white font-black rounded-xl transition-all shadow-lg shadow-red-500/30 uppercase tracking-widest text-xs">Confirmar Entrega</button>
+                    <button wire:click="saveBibNumber" class="flex-[2] py-3 bg-gradient-to-b from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white font-black rounded-xl transition-all shadow-lg shadow-red-500/30 uppercase tracking-widest text-xs">{{ $bibIsEdit ? 'Actualizar Dorsal' : 'Confirmar Entrega' }}</button>
                 </div>
             </div>
         @endif
