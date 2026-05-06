@@ -434,9 +434,9 @@ class Athletes extends Component
             $athletesQuery = Athlete::query();
             if ($this->search) {
                 $athletesQuery->where(function($q) {
-                    $q->where('name', 'like', '%'.$this->search.'%')
-                      ->orWhere('last_name', 'like', '%'.$this->search.'%')
-                      ->orWhere('identity_document', 'like', '%'.$this->search.'%');
+                    $q->where('name', 'ilike', '%'.$this->search.'%')
+                      ->orWhere('last_name', 'ilike', '%'.$this->search.'%')
+                      ->orWhere('identity_document', 'ilike', '%'.$this->search.'%');
                 });
             }
             $athletesMaster = $athletesQuery->orderBy('last_name')->paginate(20);

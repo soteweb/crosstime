@@ -26,8 +26,8 @@ class EventsUpcoming extends Component
 
         if (!empty($this->search)) {
             $query->where(function ($q) {
-                $q->where('title', 'like', '%' . $this->search . '%')
-                  ->orWhere('location_address', 'like', '%' . $this->search . '%');
+                $q->where('title', 'ilike', '%' . $this->search . '%')
+                  ->orWhere('location_address', 'ilike', '%' . $this->search . '%');
             });
         }
 
