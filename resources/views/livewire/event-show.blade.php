@@ -87,7 +87,7 @@
                             <div class="space-y-2">
                                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Categorías:</p>
                                 <div class="flex flex-wrap gap-2">
-                                    @foreach($event->categories->where('distance_id', $distance->id) as $category)
+                                    @foreach($event->categories->where('event_distance_id', $distance->id) as $category)
                                     <span class="bg-gray-50 text-gray-600 px-3 py-1.5 rounded-xl text-xs font-bold border border-gray-100">
                                         {{ $category->name }}
                                     </span>
