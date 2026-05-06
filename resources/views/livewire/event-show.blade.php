@@ -84,15 +84,78 @@
                                 <h3 class="text-lg font-black text-red-600 uppercase">{{ $distance->name }}</h3>
                                 <span class="bg-gray-100 text-gray-500 text-[10px] font-black px-2 py-1 rounded uppercase tracking-widest">Competición</span>
                             </div>
-                            <div class="space-y-2">
-                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Categorías:</p>
-                                <div class="flex flex-wrap gap-2">
-                                    @foreach($event->categories->where('event_distance_id', $distance->id) as $category)
-                                    <span class="bg-gray-50 text-gray-600 px-3 py-1.5 rounded-xl text-xs font-bold border border-gray-100">
-                                        {{ $category->name }}
-                                    </span>
-                                    @endforeach
+                            <div class="space-y-4">
+                                @php
+                                    $distCats = $event->categories->where('event_distance_id', $distance->id)->sortBy('min_age');
+                                    $males = $distCats->filter(fn($c) => strtoupper($c->gender_restriction) === 'M');
+                                    $females = $distCats->filter(fn($c) => strtoupper($c->gender_restriction) === 'F');
+                                    $mixed = $distCats->filter(fn($c) => !in_array(strtoupper($c->gender_restriction), ['M', 'F']));
+                                @endphp
+
+                                <div class="grid grid-cols-1 {{ ($males->count() > 0 && $females->count() > 0) ? 'sm:grid-cols-2' : '' }} gap-6">
+                                    @if($males->count() > 0)
+                                    <div>
+                                        <div class="flex items-center text-blue-600 mb-3 border-b border-blue-100 pb-2">
+                                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                            <span class="text-[10px] font-black uppercase tracking-widest">Masculino</span>
+                                        </div>
+                                        <div class="flex flex-col gap-2">
+                                            @foreach($males as $category)
+                                                <div class="bg-blue-50/50 text-blue-900 px-3 py-2 rounded-xl text-xs font-bold border border-blue-100 flex items-center justify-between hover:bg-blue-100 transition-colors">
+                                                    <span class="truncate pr-2">{{ $category->name }}</span>
+                                                    @if($category->min_age || $category->max_age)
+                                                        <span class="text-[9px] font-black tracking-widest text-blue-600 bg-white px-2 py-1 rounded-lg shadow-sm whitespace-nowrap">
+                                                            {{ $category->min_age ?? '0' }} A {{ $category->max_age ?? '+' }} AÑOS
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                    @endif
+
+                                    @if($females->count() > 0)
+                                    <div>
+                                        <div class="flex items-center text-pink-600 mb-3 border-b border-pink-100 pb-2">
+                                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                            <span class="text-[10px] font-black uppercase tracking-widest">Femenino</span>
+                                        </div>
+                                        <div class="flex flex-col gap-2">
+                                            @foreach($females as $category)
+                                                <div class="bg-pink-50/50 text-pink-900 px-3 py-2 rounded-xl text-xs font-bold border border-pink-100 flex items-center justify-between hover:bg-pink-100 transition-colors">
+                                                    <span class="truncate pr-2">{{ $category->name }}</span>
+                                                    @if($category->min_age || $category->max_age)
+                                                        <span class="text-[9px] font-black tracking-widest text-pink-600 bg-white px-2 py-1 rounded-lg shadow-sm whitespace-nowrap">
+                                                            {{ $category->min_age ?? '0' }} A {{ $category->max_age ?? '+' }} AÑOS
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                    @endif
                                 </div>
+
+                                @if($mixed->count() > 0)
+                                <div class="{{ ($males->count() > 0 || $females->count() > 0) ? 'mt-4 pt-4 border-t border-gray-100' : '' }}">
+                                    <div class="flex items-center text-gray-600 mb-3">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                                        <span class="text-[10px] font-black uppercase tracking-widest">General / Sin Especificar</span>
+                                    </div>
+                                    <div class="flex flex-wrap gap-2">
+                                        @foreach($mixed as $category)
+                                            <div class="bg-gray-50 text-gray-700 px-3 py-2 rounded-xl text-xs font-bold border border-gray-200 flex items-center">
+                                                <span>{{ $category->name }}</span>
+                                                @if($category->min_age || $category->max_age)
+                                                    <span class="ml-2 text-[9px] font-black tracking-widest text-gray-500 bg-white px-2 py-1 rounded-lg shadow-sm">
+                                                        {{ $category->min_age ?? '0' }} A {{ $category->max_age ?? '+' }} AÑOS
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                @endif
                             </div>
                         </div>
                         @endforeach
