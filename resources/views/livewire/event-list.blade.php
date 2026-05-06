@@ -179,7 +179,7 @@
 
         @if($totalEvents > 6)
             <div class="mt-12 flex justify-center">
-                <a href="{{ route('events.upcoming') }}" class="bg-white border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white font-bold py-4 px-12 rounded-2xl transition-all duration-300 shadow-xl hover:shadow-red-500/30 uppercase tracking-widest text-sm inline-block">
+                <a href="{{ route('events.upcoming') }}" class="bg-white border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white font-bold py-3 px-8 rounded-2xl transition-all duration-300 shadow-xl hover:shadow-red-500/30 uppercase tracking-widest text-sm inline-flex w-max">
                     Ver Todos los Eventos ({{ $totalEvents }})
                 </a>
             </div>
@@ -194,11 +194,6 @@
                 <h3 class="text-3xl font-bold text-white border-l-4 border-red-600 pl-4 mb-2">Resultados</h3>
                 <p class="text-gray-400 font-medium ml-5">Eventos ya realizados y clasificaciones.</p>
             </div>
-            @if(\App\Models\Event::where('is_active', true)->where('date', '<', now()->startOfDay())->count() > 6)
-                <a href="{{ route('events.past') }}" class="bg-white/10 border border-white/20 text-white hover:bg-white hover:text-gray-900 font-bold py-3 px-8 rounded-xl transition-all shadow-lg uppercase tracking-widest text-xs inline-block text-center whitespace-nowrap">
-                    Ver Todo el Historial
-                </a>
-            @endif
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -245,6 +240,14 @@
                 </div>
             @endforeach
         </div>
+
+        @if(\App\Models\Event::where('is_active', true)->where('date', '<', now()->startOfDay())->count() > 6)
+            <div class="mt-12 flex justify-center">
+                <a href="{{ route('events.past') }}" class="bg-gray-900 border-2 border-white/20 text-white hover:bg-white hover:text-gray-900 font-bold py-3 px-8 rounded-2xl transition-all duration-300 shadow-xl uppercase tracking-widest text-sm inline-flex w-max">
+                    Ver Todo el Historial
+                </a>
+            </div>
+        @endif
     </div>
     @endif
 </div>

@@ -1,12 +1,21 @@
 <div class="space-y-12 pb-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
     
-    <div class="mb-12">
-        <a href="{{ route('home') }}" class="text-gray-500 hover:text-red-600 transition-colors text-xs font-bold uppercase tracking-widest flex items-center mb-6">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-            Volver al Inicio
-        </a>
-        <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 border-l-8 border-red-600 pl-6 tracking-tight">Historial de Resultados</h1>
-        <p class="text-gray-500 font-medium ml-8 mt-4 text-lg">Consulta las clasificaciones y resultados de todas nuestras competencias anteriores.</p>
+    <div class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+            <a href="{{ route('home') }}" class="text-gray-500 hover:text-red-600 transition-colors text-xs font-bold uppercase tracking-widest flex items-center mb-6">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Volver al Inicio
+            </a>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 border-l-8 border-red-600 pl-6 tracking-tight">Historial de Resultados</h1>
+            <p class="text-gray-500 font-medium ml-8 mt-4 text-lg">Consulta las clasificaciones y resultados de todas nuestras competencias anteriores.</p>
+        </div>
+        
+        <div class="w-full md:w-1/3 relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+            <input wire:model.live.debounce.300ms="search" type="text" class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-red-600 focus:border-red-600 sm:text-sm shadow-sm transition-shadow" placeholder="Buscar por evento o ciudad...">
+        </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

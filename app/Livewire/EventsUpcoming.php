@@ -10,13 +10,28 @@ class EventsUpcoming extends Component
 {
     use WithPagination;
 
+    public $search = '';
+
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
     public function render()
     {
-        $events = Event::with(['categories', 'eventType'])
+        $query = Event::with(['categories', 'eventType'])
             ->where('is_active', true)
             ->where('date', '>=', now()->startOfDay())
-            ->orderBy('date', 'asc')
-            ->paginate(12);
+            ->orderBy('date', 'asc');
+
+        if (!empty($this->search)) {
+            $query->where(function ($q) {
+                $q->where('title', 'like', '%' . $this->search . '%')
+                  ->orWhere('location_address', 'like', '%' . $this->search . '%');
+            });
+        }
+
+        $events = $query->paginate(12);
 
         return view('livewire.events-upcoming', [
             'events' => $events,
