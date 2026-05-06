@@ -143,7 +143,7 @@
                             </a>
                         </h3>
                         
-                        <p class="text-gray-600 text-sm mb-4 line-clamp-2">
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-2 break-all md:break-words">
                             {{ strip_tags($event->description) }}
                         </p>
 

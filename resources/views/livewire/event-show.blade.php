@@ -65,7 +65,7 @@
                         <span class="w-2 h-6 bg-red-600 rounded-full mr-3"></span>
                         Información General
                     </h2>
-                    <div class="prose prose-red max-w-none text-gray-600 leading-relaxed font-medium">
+                    <div class="prose prose-red max-w-none text-gray-600 leading-relaxed font-medium overflow-x-auto break-words">
                         {!! $event->description !!}
                     </div>
                 </div>
