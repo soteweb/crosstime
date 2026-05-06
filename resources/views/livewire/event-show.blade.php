@@ -101,8 +101,8 @@
                                         </div>
                                         <div class="flex flex-col gap-2">
                                             @foreach($males as $category)
-                                                <div class="bg-blue-50/50 text-blue-900 px-3 py-2 rounded-xl text-xs font-bold border border-blue-100 flex items-center justify-between hover:bg-blue-100 transition-colors">
-                                                    <span class="truncate pr-2">{{ $category->name }}</span>
+                                                <div class="bg-blue-50/50 text-blue-900 px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold border border-blue-100 flex flex-col 2xl:flex-row items-start 2xl:items-center justify-between gap-1.5 hover:bg-blue-100 transition-colors">
+                                                    <span class="leading-tight">{{ $category->name }}</span>
                                                     @if($category->min_age || $category->max_age)
                                                         <span class="text-[9px] font-black tracking-widest text-blue-600 bg-white px-2 py-1 rounded-lg shadow-sm whitespace-nowrap">
                                                             {{ $category->min_age ?? '0' }} A {{ $category->max_age ?? '+' }} AÑOS
@@ -122,8 +122,8 @@
                                         </div>
                                         <div class="flex flex-col gap-2">
                                             @foreach($females as $category)
-                                                <div class="bg-pink-50/50 text-pink-900 px-3 py-2 rounded-xl text-xs font-bold border border-pink-100 flex items-center justify-between hover:bg-pink-100 transition-colors">
-                                                    <span class="truncate pr-2">{{ $category->name }}</span>
+                                                <div class="bg-pink-50/50 text-pink-900 px-3 py-2 rounded-xl text-[11px] sm:text-xs font-bold border border-pink-100 flex flex-col 2xl:flex-row items-start 2xl:items-center justify-between gap-1.5 hover:bg-pink-100 transition-colors">
+                                                    <span class="leading-tight">{{ $category->name }}</span>
                                                     @if($category->min_age || $category->max_age)
                                                         <span class="text-[9px] font-black tracking-widest text-pink-600 bg-white px-2 py-1 rounded-lg shadow-sm whitespace-nowrap">
                                                             {{ $category->min_age ?? '0' }} A {{ $category->max_age ?? '+' }} AÑOS
