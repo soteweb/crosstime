@@ -188,7 +188,7 @@
 
     <!-- Resultados Section -->
     @if(count($pastEvents) > 0)
-    <div class="bg-gray-900 -mx-6 md:-mx-12 px-6 md:px-12 py-16 rounded-[40px] mt-20">
+    <div class="bg-gray-900 mx-0 sm:-mx-6 md:-mx-12 px-6 md:px-12 py-16 rounded-[40px] mt-20 overflow-hidden">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-12 gap-4">
             <div>
                 <h3 class="text-3xl font-bold text-white border-l-4 border-red-600 pl-4 mb-2">Resultados</h3>
