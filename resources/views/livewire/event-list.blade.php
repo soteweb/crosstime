@@ -14,7 +14,7 @@
             ]
         }"
         x-init="setInterval(() => activeSlide = (activeSlide === slides.length - 1) ? 0 : activeSlide + 1, 4000)"
-        class="relative w-full h-[300px] md:h-[500px] rounded-3xl overflow-hidden shadow-2xl mt-4 bg-gray-100 border border-gray-200"
+        class="relative w-full h-[300px] md:h-[500px] rounded-3xl overflow-hidden shadow-2xl mt-4 bg-gray-100 border border-gray-200 hidden md:block"
     >
         <!-- Alpine Slides -->
         <template x-for="(slide, index) in slides" :key="index">

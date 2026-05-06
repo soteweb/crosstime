@@ -22,24 +22,54 @@
         <!-- Livewire Styles -->
         @livewireStyles
     </head>
-    <body class="bg-gray-50 text-gray-900 min-h-screen antialiased">
+    <body class="bg-gray-50 text-gray-900 min-h-screen antialiased overflow-x-hidden">
         
         <!-- Header -->
-        <header class="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
+        <header class="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50" x-data="{ mobileMenuOpen: false }">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between h-20">
                     <div class="flex items-center">
                         <a href="{{ route('home') }}" class="flex items-center group">
                             <img src="{{ asset('img/logo.jpg') }}" alt="Logo Itapúa Cross" class="h-12 w-auto mr-4 rounded-xl shadow-sm group-hover:scale-105 transition-transform">
-                            <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest opacity-60">by Itapúa Cross</span>
+                            <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest opacity-60 hidden sm:inline">by Itapúa Cross</span>
                         </a>
                     </div>
-                    <div class="flex items-center space-x-6">
+                    
+                    <!-- Desktop Menu -->
+                    <div class="hidden md:flex items-center space-x-6">
                         <a href="{{ route('home') }}" class="text-sm text-gray-600 hover:text-red-600 rounded-md font-bold transition-colors uppercase tracking-widest">Eventos</a>
                         @foreach(\App\Models\MenuItem::where('placement', 'header')->orderBy('order')->get() as $menu)
                             <a href="{{ str_starts_with($menu->url, 'http') ? $menu->url : url($menu->url) }}" target="{{ $menu->target }}" class="text-sm text-gray-600 hover:text-red-600 rounded-md font-bold transition-colors uppercase tracking-widest">{{ $menu->name }}</a>
                         @endforeach
                     </div>
+
+                    <!-- Mobile Menu Button -->
+                    <div class="flex items-center md:hidden">
+                        <button @click="mobileMenuOpen = !mobileMenuOpen" class="text-gray-500 hover:text-red-600 focus:outline-none p-2">
+                            <svg class="h-6 w-6" x-show="!mobileMenuOpen" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                            <svg class="h-6 w-6" x-cloak x-show="mobileMenuOpen" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Menu Dropdown -->
+            <div x-cloak x-show="mobileMenuOpen" class="md:hidden bg-white border-t border-gray-100 shadow-xl absolute w-full left-0" 
+                 x-transition:enter="transition ease-out duration-200" 
+                 x-transition:enter-start="opacity-0 -translate-y-2" 
+                 x-transition:enter-end="opacity-100 translate-y-0" 
+                 x-transition:leave="transition ease-in duration-150" 
+                 x-transition:leave-start="opacity-100 translate-y-0" 
+                 x-transition:leave-end="opacity-0 -translate-y-2">
+                <div class="px-4 pt-2 pb-6 space-y-1">
+                    <a href="{{ route('home') }}" class="block px-3 py-4 text-sm font-bold text-gray-900 border-b border-gray-50 uppercase tracking-widest hover:bg-gray-50 hover:text-red-600 transition-colors">Eventos</a>
+                    @foreach(\App\Models\MenuItem::where('placement', 'header')->orderBy('order')->get() as $menu)
+                        <a href="{{ str_starts_with($menu->url, 'http') ? $menu->url : url($menu->url) }}" target="{{ $menu->target }}" class="block px-3 py-4 text-sm font-bold text-gray-900 border-b border-gray-50 uppercase tracking-widest hover:bg-gray-50 hover:text-red-600 transition-colors">{{ $menu->name }}</a>
+                    @endforeach
                 </div>
             </div>
         </header>
