@@ -51,13 +51,62 @@
                     <input type="text" wire:model.live="search" placeholder="Buscar por nombre, apellido o CI..." class="w-full rounded-xl border-gray-200 bg-gray-50 focus:border-red-600 focus:ring-red-600 font-medium p-3">
                 </div>
                 @if($tab === 'registrations')
-                <div class="w-full md:w-64">
-                    <select wire:model.live="filter_event" class="w-full rounded-xl border-gray-200 bg-gray-50 focus:border-red-600 focus:ring-red-600 font-bold p-3">
-                        <option value="">Todos los Eventos</option>
-                        @foreach($events as $e)
-                            <option value="{{ $e->id }}">{{ $e->title }}</option>
-                        @endforeach
-                    </select>
+                <div class="w-full md:w-80">
+                    <div x-data="{ open: false }" class="relative w-full">
+                        <div class="relative" @click.away="open = false">
+                            <div @click="open = true; $nextTick(() => $refs.search.focus())" 
+                                 class="w-full rounded-xl border border-gray-200 bg-gray-50 p-3 shadow-sm cursor-pointer flex justify-between items-center text-gray-700 min-h-[48px] transition-all overflow-hidden" 
+                                 :class="open ? 'ring-2 ring-red-600 border-red-600' : ''">
+                                
+                                @php
+                                    $selectedEvent = $filter_event ? collect($events)->firstWhere('id', $filter_event) : null;
+                                    if (!$selectedEvent && $filter_event) {
+                                        $selectedEvent = \App\Models\Event::find($filter_event);
+                                    }
+                                @endphp
+                                
+                                <div x-show="!open" class="truncate font-bold w-full text-sm">
+                                    {{ $selectedEvent ? $selectedEvent->title : 'Todos los Eventos' }}
+                                </div>
+                                
+                                <input 
+                                    x-show="open" 
+                                    x-ref="search"
+                                    type="text" 
+                                    wire:model.live.debounce.300ms="eventSearchTerm" 
+                                    class="bg-transparent border-none p-0 focus:ring-0 w-full font-bold text-sm" 
+                                    placeholder="Buscar evento..."
+                                >
+                                <svg class="w-5 h-5 text-gray-400 shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                            
+                            <div x-cloak x-show="open" 
+                                 x-transition
+                                 class="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-2xl max-h-72 overflow-y-auto">
+                                
+                                <button type="button" 
+                                        wire:click="$set('filter_event', ''); $set('eventSearchTerm', '')" 
+                                        @click="open = false" 
+                                        class="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 hover:bg-gray-50 border-b border-gray-100 transition-colors">
+                                    Todos los Eventos
+                                </button>
+                                
+                                @foreach($events as $e)
+                                    <button type="button"
+                                            wire:click="$set('filter_event', '{{ $e->id }}'); $set('eventSearchTerm', '')" 
+                                            @click="open = false" 
+                                            class="w-full text-left px-4 py-2 text-sm font-bold text-gray-900 hover:bg-red-50 hover:text-red-600 border-b border-gray-50 transition-colors">
+                                        <span class="line-clamp-1">{{ $e->title }}</span>
+                                        <span class="block text-[10px] text-gray-400 font-medium mt-0.5 uppercase tracking-widest">{{ \Carbon\Carbon::parse($e->date)->translatedFormat('d M, Y') }}</span>
+                                    </button>
+                                @endforeach
+                                
+                                @if(count($events) === 0)
+                                    <div class="px-4 py-3 text-xs font-bold text-gray-400 text-center uppercase tracking-widest">No hay coincidencias</div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 @endif
             </div>
@@ -228,10 +277,63 @@
                     <div class="space-y-4">
                         <h4 class="text-[10px] font-bold text-red-600 uppercase tracking-widest border-b border-red-100 pb-2">2. Evento</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <select wire:model.live="selected_event_id" class="w-full md:col-span-2 rounded-xl border-gray-200 font-bold p-3">
-                                <option value="">Seleccionar Evento</option>
-                                @foreach($events as $e) <option value="{{ $e->id }}">{{ $e->title }}</option> @endforeach
-                            </select>
+                            <div class="w-full md:col-span-2">
+                                <div x-data="{ open: false }" class="relative w-full">
+                                    <div class="relative" @click.away="open = false">
+                                        <div @click="open = true; $nextTick(() => $refs.searchReg.focus())" 
+                                             class="w-full rounded-xl border border-gray-200 bg-white p-3 shadow-inner cursor-pointer flex justify-between items-center text-gray-700 min-h-[48px] transition-all overflow-hidden" 
+                                             :class="open ? 'ring-2 ring-red-600 border-red-600' : ''">
+                                            
+                                            @php
+                                                $selectedRegEvent = $selected_event_id ? collect($registrationEvents)->firstWhere('id', $selected_event_id) : null;
+                                                if (!$selectedRegEvent && $selected_event_id) {
+                                                    $selectedRegEvent = \App\Models\Event::find($selected_event_id);
+                                                }
+                                            @endphp
+                                            
+                                            <div x-show="!open" class="truncate font-bold w-full text-sm">
+                                                {{ $selectedRegEvent ? $selectedRegEvent->title : 'Seleccionar Evento...' }}
+                                            </div>
+                                            
+                                            <input 
+                                                x-show="open" 
+                                                x-ref="searchReg"
+                                                type="text" 
+                                                wire:model.live.debounce.300ms="registrationEventSearchTerm" 
+                                                class="bg-transparent border-none p-0 focus:ring-0 w-full font-bold text-sm" 
+                                                placeholder="Buscar evento..."
+                                            >
+                                            <svg class="w-5 h-5 text-gray-400 shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                        </div>
+                                        
+                                        <div x-cloak x-show="open" 
+                                             x-transition
+                                             class="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-2xl max-h-72 overflow-y-auto">
+                                            
+                                            <button type="button" 
+                                                    wire:click="$set('selected_event_id', ''); $set('registrationEventSearchTerm', '')" 
+                                                    @click="open = false" 
+                                                    class="w-full text-left px-4 py-3 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 hover:bg-gray-50 border-b border-gray-100 transition-colors">
+                                                × Limpiar Selección
+                                            </button>
+                                            
+                                            @foreach($registrationEvents as $e)
+                                                <button type="button"
+                                                        wire:click="$set('selected_event_id', '{{ $e->id }}'); $set('registrationEventSearchTerm', '')" 
+                                                        @click="open = false" 
+                                                        class="w-full text-left px-4 py-2 text-sm font-bold text-gray-900 hover:bg-red-50 hover:text-red-600 border-b border-gray-50 transition-colors">
+                                                    <span class="line-clamp-1">{{ $e->title }}</span>
+                                                    <span class="block text-[10px] text-gray-400 font-medium mt-0.5 uppercase tracking-widest">{{ \Carbon\Carbon::parse($e->date)->translatedFormat('d M, Y') }}</span>
+                                                </button>
+                                            @endforeach
+                                            
+                                            @if(count($registrationEvents) === 0)
+                                                <div class="px-4 py-3 text-xs font-bold text-gray-400 text-center uppercase tracking-widest">No hay coincidencias</div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <select wire:model.live="selected_distance_id" class="w-full rounded-xl border-gray-200 font-bold p-3">
                                 <option value="">Distancia</option>
                                 @foreach($eventDistances as $d) <option value="{{ $d->id }}">{{ $d->name }}</option> @endforeach

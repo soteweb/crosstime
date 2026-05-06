@@ -40,6 +40,8 @@ class Athletes extends Component
     public $selected_event_id = '';
     public $selected_distance_id = '';
     public $selected_category_id = '';
+    public $eventSearchTerm = '';
+    public $registrationEventSearchTerm = '';
     public $payment_method = 'Efectivo';
     public $payment_status = 'paid';
     public $tshirt_size = '';
@@ -425,7 +427,20 @@ class Athletes extends Component
         }
 
         $registrations = $query->orderBy('created_at', 'desc')->get();
-        $events = \App\Models\Event::all();
+        
+        // 1. Event list for Filter (Main Tab)
+        $eventsQuery = \App\Models\Event::query()->orderBy('date', 'desc');
+        if ($this->eventSearchTerm) {
+            $eventsQuery->where('title', 'ilike', '%' . $this->eventSearchTerm . '%');
+        }
+        $events = $eventsQuery->take(15)->get();
+
+        // 2. Event list for New Registration
+        $regEventsQuery = \App\Models\Event::query()->orderBy('date', 'desc');
+        if ($this->registrationEventSearchTerm) {
+            $regEventsQuery->where('title', 'ilike', '%' . $this->registrationEventSearchTerm . '%');
+        }
+        $registrationEvents = $regEventsQuery->take(15)->get();
         
         $selectedEvent = $this->selected_event_id ? \App\Models\Event::with(['distances', 'categories'])->find($this->selected_event_id) : null;
         
@@ -446,6 +461,7 @@ class Athletes extends Component
             'registrations' => $registrations,
             'athletesMaster' => $athletesMaster,
             'events' => $events,
+            'registrationEvents' => $registrationEvents,
             'eventDistances' => $selectedEvent?->distances ?? collect(),
             'eventCategories' => $selectedEvent?->categories->when($this->selected_distance_id, function($q) {
                 return $q->where('event_distance_id', $this->selected_distance_id);

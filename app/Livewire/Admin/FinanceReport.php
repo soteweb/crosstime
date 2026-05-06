@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 class FinanceReport extends Component
 {
     public $selected_event_id = '';
+    public $eventSearchTerm = '';
     
     public function mount()
     {
@@ -22,7 +23,11 @@ class FinanceReport extends Component
 
     public function render()
     {
-        $events = Event::orderBy('date', 'desc')->get();
+        $eventsQuery = Event::orderBy('date', 'desc');
+        if ($this->eventSearchTerm) {
+            $eventsQuery->where('title', 'ilike', '%' . $this->eventSearchTerm . '%');
+        }
+        $events = $eventsQuery->take(15)->get();
         
         $stats = [
             'total_collected' => 0,

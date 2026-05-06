@@ -5,13 +5,64 @@
             <p class="text-[10px] text-gray-400 ml-4 font-bold uppercase tracking-widest mt-1">Control de ingresos y proyecciones</p>
         </div>
         
-        <div class="w-full md:w-80">
-            <select wire:model.live="selected_event_id" class="w-full rounded-2xl border-gray-200 bg-white font-bold p-4 shadow-sm focus:border-red-600 focus:ring-red-600 transition-all">
-                <option value="">Seleccionar Evento...</option>
-                @foreach($events as $e)
-                    <option value="{{ $e->id }}">{{ $e->title }} ({{ $e->date->format('d/m/Y') }})</option>
-                @endforeach
-            </select>
+        <div class="w-full md:w-96">
+            <div x-data="{ open: false }" class="relative w-full">
+                <div class="relative" @click.away="open = false">
+                    <!-- Fake Select / Input -->
+                    <div @click="open = true; $nextTick(() => $refs.search.focus())" 
+                         class="w-full rounded-2xl border border-gray-200 bg-white p-4 shadow-sm cursor-pointer flex justify-between items-center text-gray-700 min-h-[56px] transition-all overflow-hidden" 
+                         :class="open ? 'ring-2 ring-red-600 border-red-600' : ''">
+                        
+                        @php
+                            $selectedEvent = $selected_event_id ? collect($events)->firstWhere('id', $selected_event_id) : null;
+                            if (!$selectedEvent && $selected_event_id) {
+                                $selectedEvent = \App\Models\Event::find($selected_event_id);
+                            }
+                        @endphp
+                        
+                        <div x-show="!open" class="truncate font-bold w-full text-sm">
+                            {{ $selectedEvent ? $selectedEvent->title : 'Seleccionar Evento...' }}
+                        </div>
+                        
+                        <input 
+                            x-show="open" 
+                            x-ref="search"
+                            type="text" 
+                            wire:model.live.debounce.300ms="eventSearchTerm" 
+                            class="bg-transparent border-none p-0 focus:ring-0 w-full font-bold text-sm" 
+                            placeholder="Buscar evento por nombre..."
+                        >
+                        <svg class="w-5 h-5 text-gray-400 shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+                    
+                    <!-- Dropdown List -->
+                    <div x-cloak x-show="open" 
+                         x-transition
+                         class="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-2xl shadow-2xl max-h-72 overflow-y-auto">
+                        
+                        <button type="button" 
+                                wire:click="$set('selected_event_id', ''); $set('eventSearchTerm', '')" 
+                                @click="open = false" 
+                                class="w-full text-left px-5 py-4 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-gray-900 hover:bg-gray-50 border-b border-gray-100 transition-colors">
+                            × Limpiar Selección
+                        </button>
+                        
+                        @foreach($events as $e)
+                            <button type="button"
+                                    wire:click="$set('selected_event_id', '{{ $e->id }}'); $set('eventSearchTerm', '')" 
+                                    @click="open = false" 
+                                    class="w-full text-left px-5 py-3 text-sm font-bold text-gray-900 hover:bg-red-50 hover:text-red-600 border-b border-gray-50 transition-colors">
+                                <span class="line-clamp-1">{{ $e->title }}</span>
+                                <span class="block text-[10px] text-gray-400 font-medium mt-0.5 uppercase tracking-widest">{{ \Carbon\Carbon::parse($e->date)->translatedFormat('d M, Y') }}</span>
+                            </button>
+                        @endforeach
+                        
+                        @if(count($events) === 0)
+                            <div class="px-5 py-4 text-xs font-bold text-gray-400 text-center uppercase tracking-widest">No hay coincidencias</div>
+                        @endif
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
