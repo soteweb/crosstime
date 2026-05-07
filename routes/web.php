@@ -28,6 +28,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function() {
     Route::get('/pages/{page}/edit', \App\Livewire\Admin\PageEditor::class)->name('admin.pages.edit');
     Route::get('/menus', \App\Livewire\Admin\MenuAdmin::class)->name('admin.menus');
     Route::get('/athletes', Athletes::class)->name('admin.athletes');
+    Route::get('/check-in', \App\Livewire\Admin\CheckIn::class)->name('admin.check-in');
     Route::get('/finanzas', \App\Livewire\Admin\FinanceReport::class)->name('admin.finance');
     Route::get('/usuarios', \App\Livewire\Admin\UsersAdmin::class)->name('admin.users');
 
