@@ -7,10 +7,11 @@ use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 use App\Models\Registration;
 use App\Models\Athlete;
+use App\Traits\HasWhatsApp;
 
 class Athletes extends Component
 {
-    use WithFileUploads, WithPagination;
+    use WithFileUploads, WithPagination, HasWhatsApp;
 
     public $search = '';
     public $filter_event = '';
@@ -152,15 +153,7 @@ class Athletes extends Component
         $wasEdit = $this->bibIsEdit;
 
         if (!$wasEdit) {
-            // Generate WhatsApp Link only on first assignment
-            $phone = preg_replace('/[^0-9]/', '', $reg->athlete->phone);
-            if (strlen($phone) === 9 && $phone[0] === '0') {
-                $phone = '595' . substr($phone, 1);
-            } elseif (strlen($phone) === 9) {
-                $phone = '595' . $phone;
-            }
-            $message = "¡Hola *{$reg->athlete->name}*! 👋 Ya retiraste tu kit para el evento *{$reg->event->title}*. Tu número de dorsal asignado es el *#{$reg->bib_number}*. ¡Muchos éxitos en la carrera! 🏃‍♂️🏁";
-            $this->whatsappUrl = "https://wa.me/{$phone}?text=" . urlencode($message);
+            $this->whatsappUrl = $this->generateWhatsAppUrl($reg);
         }
 
         $this->reset(['selectedRegistrationId', 'bib_number', 'bibIsEdit']);
@@ -282,6 +275,10 @@ class Athletes extends Component
 
     public function deleteRegistration($id)
     {
+        if (auth()->user()->role === \App\Models\User::ROLE_STAFF) {
+            session()->flash('error', 'No tienes permisos para eliminar inscripciones.');
+            return;
+        }
         Registration::find($id)?->delete();
     }
 
@@ -360,21 +357,7 @@ class Athletes extends Component
 
     public function exportToCSV()
     {
-        $query = Registration::with(['athlete', 'event', 'category', 'distance']);
-
-        if ($this->search) {
-            $query->whereHas('athlete', function($q) {
-                $q->where('name', 'like', '%'.$this->search.'%')
-                  ->orWhere('last_name', 'like', '%'.$this->search.'%')
-                  ->orWhere('identity_document', 'like', '%'.$this->search.'%');
-            })->orWhere('bib_number', 'like', '%'.$this->search.'%');
-        }
-
-        if ($this->filter_event) {
-            $query->where('event_id', $this->filter_event);
-        }
-
-        $registrations = $query->orderBy('created_at', 'desc')->get();
+        $registrations = $this->getRegistrationsQuery()->orderBy('created_at', 'desc')->get();
 
         $filename = "inscripciones_" . now()->format('Y-m-d_H-i') . ".csv";
         $headers = [
@@ -410,23 +393,30 @@ class Athletes extends Component
         return response()->stream($callback, 200, $headers);
     }
 
-    public function render()
+    private function getRegistrationsQuery()
     {
         $query = Registration::with(['athlete', 'event', 'category', 'distance']);
 
         if ($this->search) {
-            $query->whereHas('athlete', function($q) {
-                $q->where('name', 'like', '%'.$this->search.'%')
-                  ->orWhere('last_name', 'like', '%'.$this->search.'%')
-                  ->orWhere('identity_document', 'like', '%'.$this->search.'%');
-            })->orWhere('bib_number', 'like', '%'.$this->search.'%');
+            $query->where(function($q) {
+                $q->whereHas('athlete', function($inner) {
+                    $inner->where('name', 'ilike', '%'.$this->search.'%')
+                          ->orWhere('last_name', 'ilike', '%'.$this->search.'%')
+                          ->orWhere('identity_document', 'ilike', '%'.$this->search.'%');
+                })->orWhere('bib_number', 'ilike', '%'.$this->search.'%');
+            });
         }
 
         if ($this->filter_event) {
             $query->where('event_id', $this->filter_event);
         }
 
-        $registrations = $query->orderBy('created_at', 'desc')->get();
+        return $query;
+    }
+
+    public function render()
+    {
+        $registrations = $this->getRegistrationsQuery()->orderBy('created_at', 'desc')->get();
         
         // 1. Event list for Filter (Main Tab)
         $eventsQuery = \App\Models\Event::query()->orderBy('date', 'desc');

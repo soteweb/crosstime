@@ -5,9 +5,11 @@ namespace App\Livewire\Admin;
 use Livewire\Component;
 use App\Models\Event;
 use App\Models\Registration;
+use App\Traits\HasWhatsApp;
 
 class CheckIn extends Component
 {
+    use HasWhatsApp;
     public $eventSearchTerm = '';
     public $selected_event_id = '';
     
@@ -65,14 +67,7 @@ class CheckIn extends Component
             }
             $registration->save();
 
-            // WhatsApp url format (similar to Athletes)
-            $phone = $registration->athlete->phone;
-            if ($phone && !str_starts_with($phone, '595')) {
-                $phone = '595' . ltrim($phone, '0');
-            }
-            
-            $message = "🏆 ¡Hola *{$registration->athlete->name}*! Ya retiraste tu kit para el evento *{$registration->event->title}*. Tu número de dorsal asignado es el *#{$registration->bib_number}*. ¡Muchos éxitos en la carrera! 🏃‍♂️🏁";
-            $this->whatsappUrl = "https://wa.me/{$phone}?text=" . urlencode($message);
+            $this->whatsappUrl = $this->generateWhatsAppUrl($registration);
 
             session()->flash('message', '¡Kit entregado a ' . $registration->athlete->name . '! Dorsal #' . $registration->bib_number);
             
