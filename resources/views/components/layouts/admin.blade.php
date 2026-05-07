@@ -39,7 +39,8 @@
                x-transition:leave="transition ease-in duration-300"
                x-transition:leave-start="translate-x-0"
                x-transition:leave-end="-translate-x-full"
-               class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col shadow-2xl lg:hidden">
+               x-cloak
+               class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col shadow-2xl md:hidden">
             <div class="h-20 flex items-center justify-between px-6 border-b border-gray-100">
                 <div class="flex items-center">
                     <img src="{{ asset('img/logo.jpg') }}" alt="Logo" class="h-10 w-auto mr-3 rounded-xl shadow-sm">
@@ -55,7 +56,7 @@
         </aside>
 
         <!-- Desktop Sidebar -->
-        <aside class="hidden lg:flex w-64 bg-white border-r border-gray-200 flex-col sticky top-0 h-screen shadow-sm">
+        <aside class="hidden md:flex w-64 bg-white border-r border-gray-200 flex-col sticky top-0 h-screen shadow-sm">
             <div class="h-20 flex items-center px-6 border-b border-gray-100">
                 <img src="{{ asset('img/logo.jpg') }}" alt="Logo" class="h-10 w-auto mr-3 rounded-xl shadow-sm">
                 <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest opacity-60">by Itapúa Cross</span>
@@ -80,7 +81,7 @@
             <!-- Topbar -->
             <header class="h-16 bg-white border-b border-gray-200 flex flex-shrink-0 items-center justify-between px-6 shadow-sm sticky top-0 z-10">
                 <div class="flex items-center">
-                    <button @click="sidebarOpen = true" class="mr-4 lg:hidden text-gray-500 hover:text-gray-900">
+                    <button @click="sidebarOpen = true" class="mr-4 md:hidden text-gray-500 hover:text-gray-900">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                     </button>
                     <h2 class="text-lg md:text-xl font-bold text-gray-800 truncate">{{ $title ?? 'Panel' }}</h2>
