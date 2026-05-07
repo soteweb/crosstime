@@ -18,15 +18,33 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
     </head>
-    <body class="bg-gray-50 text-gray-900 min-h-screen antialiased flex">
+    <body x-data="{ sidebarOpen: false }" class="bg-gray-50 text-gray-900 min-h-screen antialiased flex overflow-hidden">
         
+        <!-- Mobile Sidebar Overlay -->
+        <div x-show="sidebarOpen" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @click="sidebarOpen = false" 
+             class="fixed inset-0 z-40 bg-gray-900/50 backdrop-blur-sm lg:hidden"></div>
+
         <!-- Sidebar -->
-        <aside class="w-64 bg-white border-r border-gray-200 flex flex-col hidden md:flex shadow-sm sticky top-0 h-screen">
-            <div class="h-20 flex items-center px-6 border-b border-gray-100">
-                <img src="{{ asset('img/logo.jpg') }}" alt="Logo" class="h-10 w-auto mr-3 rounded-xl shadow-sm">
-                <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest opacity-60">by Itapúa Cross</span>
+        <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+               class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col shadow-2xl lg:shadow-none lg:static lg:h-screen transition-transform duration-300 ease-in-out">
+            <div class="h-20 flex items-center justify-between px-6 border-b border-gray-100">
+                <div class="flex items-center">
+                    <img src="{{ asset('img/logo.jpg') }}" alt="Logo" class="h-10 w-auto mr-3 rounded-xl shadow-sm">
+                    <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest opacity-60">by Itapúa Cross</span>
+                </div>
+                <button @click="sidebarOpen = false" class="lg:hidden text-gray-400 hover:text-gray-900">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
-                       <nav class="flex-1 px-4 py-6 space-y-2">
+            
+            <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
                 <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'bg-red-50 text-red-600' : 'text-gray-600 hover:bg-gray-50' }} flex items-center px-4 py-3 text-sm font-bold rounded-lg transition-colors cursor-pointer">
                     <svg class="w-5 h-5 mr-3 {{ request()->routeIs('admin.dashboard') ? 'text-red-600' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                     Dashboard
@@ -96,19 +114,22 @@
             <!-- Topbar -->
             <header class="h-16 bg-white border-b border-gray-200 flex flex-shrink-0 items-center justify-between px-6 shadow-sm sticky top-0 z-10">
                 <div class="flex items-center">
-                    <h2 class="text-xl font-bold text-gray-800">{{ $title ?? 'Panel' }}</h2>
+                    <button @click="sidebarOpen = true" class="mr-4 lg:hidden text-gray-500 hover:text-gray-900">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    </button>
+                    <h2 class="text-lg md:text-xl font-bold text-gray-800 truncate">{{ $title ?? 'Panel' }}</h2>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <a href="{{ route('home') }}" target="_blank" class="flex items-center text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 px-4 py-2 rounded-xl transition-all shadow-sm group">
+                <div class="flex items-center space-x-2 md:space-x-4">
+                    <a href="{{ route('home') }}" target="_blank" class="hidden sm:flex items-center text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 px-4 py-2 rounded-xl transition-all shadow-sm group">
                         <svg class="w-4 h-4 mr-2 text-red-500 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                        Ver Sitio Web
+                        Ver Sitio
                     </a>
-                    <span class="bg-gray-100 text-gray-600 text-xs font-bold px-3 py-1 rounded-full border border-gray-200 shadow-sm">Administrador Activo</span>
+                    <span class="bg-gray-100 text-gray-600 text-[10px] md:text-xs font-bold px-2 md:px-3 py-1 rounded-full border border-gray-200 shadow-sm whitespace-nowrap">Admin Activo</span>
                 </div>
             </header>
             
             <!-- Dynamic Sub-Content Area -->
-            <div class="flex-1 overflow-auto p-6 md:p-8">
+            <div class="flex-1 overflow-auto p-4 md:p-8">
                 <div class="mx-auto max-w-6xl">
                     {{ $slot }}
                 </div>
