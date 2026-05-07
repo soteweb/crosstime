@@ -143,6 +143,7 @@ class Athletes extends Component
             $reg->payment_status = 'paid';
             if (!$reg->kit_delivered_at) {
                 $reg->kit_delivered_at = now();
+                $reg->kit_delivered_by = auth()->id();
             }
             $reg->save();
         }

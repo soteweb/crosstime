@@ -59,6 +59,7 @@ class CheckIn extends Component
             $registration->status = 'participant';
             if (!$registration->kit_delivered_at) {
                 $registration->kit_delivered_at = now();
+                $registration->kit_delivered_by = auth()->id();
             }
             $registration->save();
 
@@ -115,6 +116,7 @@ class CheckIn extends Component
             $recentDeliveries = Registration::with(['athlete', 'category'])
                 ->where('event_id', $this->selected_event_id)
                 ->whereNotNull('kit_delivered_at')
+                ->where('kit_delivered_by', auth()->id())
                 ->orderBy('kit_delivered_at', 'desc')
                 ->take(5)
                 ->get();

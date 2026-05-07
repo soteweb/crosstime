@@ -17,7 +17,13 @@ class Registration extends Model
         'payment_method',
         'observation',
         'status',
+        'kit_delivered_by',
     ];
+
+    public function deliveredBy()
+    {
+        return $this->belongsTo(User::class, 'kit_delivered_by');
+    }
 
     public function event()
     {
