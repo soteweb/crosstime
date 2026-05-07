@@ -109,10 +109,22 @@ class CheckIn extends Component
             $selectedRegistration = Registration::with(['athlete', 'category', 'distance'])->find($this->selectedRegistrationId);
         }
 
+        // 4. Recent Deliveries (Last 5 kits delivered for this event)
+        $recentDeliveries = collect();
+        if ($this->selected_event_id) {
+            $recentDeliveries = Registration::with(['athlete', 'category'])
+                ->where('event_id', $this->selected_event_id)
+                ->whereNotNull('kit_delivered_at')
+                ->orderBy('kit_delivered_at', 'desc')
+                ->take(5)
+                ->get();
+        }
+
         return view('livewire.admin.check-in', [
             'events' => $events,
             'searchResults' => $searchResults,
             'selectedRegistration' => $selectedRegistration,
+            'recentDeliveries' => $recentDeliveries,
         ])->layout('components.layouts.admin', ['title' => 'Control de Kits / Check-In']);
     }
 }

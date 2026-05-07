@@ -129,6 +129,31 @@
                         </div>
                     @endif
                 </div>
+
+                <!-- Historial Reciente -->
+                @if(count($recentDeliveries) > 0 && !$selectedRegistrationId)
+                    <div class="mt-8">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-xs font-black text-gray-400 uppercase tracking-widest">Últimas 5 Entregas</h4>
+                            <span class="bg-purple-50 text-purple-600 text-[10px] font-black px-2 py-1 rounded-lg border border-purple-100 uppercase tracking-widest">Historial</span>
+                        </div>
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-50">
+                            @foreach($recentDeliveries as $del)
+                                <div class="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
+                                    <div>
+                                        <p class="font-bold text-gray-900 text-sm uppercase">{{ $del->athlete->name }} {{ $del->athlete->last_name }}</p>
+                                        <p class="text-[10px] font-bold text-gray-400 uppercase mt-0.5">{{ \Carbon\Carbon::parse($del->kit_delivered_at)->format('H:i') }} hs • {{ $del->category->name ?? 'N/A' }}</p>
+                                    </div>
+                                    <div class="text-right flex items-center gap-2">
+                                        <div class="bg-gray-900 text-white text-xs font-black px-2.5 py-1 rounded-lg uppercase tracking-widest shadow-sm">
+                                            #{{ $del->bib_number }}
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <!-- Right Column: Verification & Action -->
