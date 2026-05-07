@@ -15,9 +15,11 @@ class CheckIn extends Component
     
     public $selectedRegistrationId = null;
     public $assigned_bib_number = '';
+    public $whatsappUrl = '';
 
     public function selectRegistration($id)
     {
+        $this->whatsappUrl = '';
         $this->selectedRegistrationId = $id;
         $registration = Registration::find($id);
         if ($registration) {
@@ -70,12 +72,10 @@ class CheckIn extends Component
             }
             
             $message = "🏆 ¡Hola *{$registration->athlete->name}*! Ya retiraste tu kit para el evento *{$registration->event->title}*. Tu número de dorsal asignado es el *#{$registration->bib_number}*. ¡Muchos éxitos en la carrera! 🏃‍♂️🏁";
-            $whatsappUrl = "https://wa.me/{$phone}?text=" . urlencode($message);
+            $this->whatsappUrl = "https://wa.me/{$phone}?text=" . urlencode($message);
 
             session()->flash('message', '¡Kit entregado a ' . $registration->athlete->name . '! Dorsal #' . $registration->bib_number);
             
-            $this->dispatch('open-whatsapp', url: $whatsappUrl);
-
             $this->clearRegistration();
             $this->athleteSearchTerm = '';
         }

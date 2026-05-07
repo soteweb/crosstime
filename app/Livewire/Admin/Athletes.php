@@ -161,7 +161,6 @@ class Athletes extends Component
             }
             $message = "¡Hola *{$reg->athlete->name}*! 👋 Ya retiraste tu kit para el evento *{$reg->event->title}*. Tu número de dorsal asignado es el *#{$reg->bib_number}*. ¡Muchos éxitos en la carrera! 🏃‍♂️🏁";
             $this->whatsappUrl = "https://wa.me/{$phone}?text=" . urlencode($message);
-            $this->dispatch('open-whatsapp', url: $this->whatsappUrl);
         }
 
         $this->reset(['selectedRegistrationId', 'bib_number', 'bibIsEdit']);
