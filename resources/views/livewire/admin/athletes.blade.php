@@ -137,25 +137,40 @@
                                     </td>
                                     <td class="p-4">
                                         <div class="space-y-1.5 w-full">
-                                            <!-- Payment Status -->
-                                            @if($reg->payment_status === 'paid')
-                                                <span class="inline-flex w-full items-center justify-center bg-green-50 text-green-700 text-[9px] font-black px-2 py-1.5 rounded-lg border border-green-200 uppercase tracking-widest">
-                                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> PAGO OK
+                                            <!-- Phase Indicator -->
+                                            @if($reg->status === 'pre_inscribed')
+                                                <span class="inline-flex w-full items-center justify-center bg-amber-50 text-amber-700 text-[9px] font-black px-2 py-1 rounded-lg border border-amber-200 uppercase tracking-widest">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400 mr-2"></span> PRE-INSCRIPTO
+                                                </span>
+                                            @elseif($reg->status === 'inscribed')
+                                                <span class="inline-flex w-full items-center justify-center bg-blue-50 text-blue-700 text-[9px] font-black px-2 py-1 rounded-lg border border-blue-200 uppercase tracking-widest">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-400 mr-2"></span> INSCRIPTO
                                                 </span>
                                             @else
-                                                <span class="inline-flex w-full items-center justify-center bg-red-50 text-red-700 text-[9px] font-black px-2 py-1.5 rounded-lg border border-red-200 uppercase tracking-widest">
-                                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> DEBE PAGAR
+                                                <span class="inline-flex w-full items-center justify-center bg-emerald-50 text-emerald-700 text-[9px] font-black px-2 py-1 rounded-lg border border-emerald-200 uppercase tracking-widest">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-2"></span> ACREDITADO
+                                                </span>
+                                            @endif
+
+                                            <!-- Payment Status -->
+                                            @if($reg->payment_status === 'paid')
+                                                <span class="inline-flex w-full items-center justify-center bg-green-50 text-green-700 text-[8px] font-bold px-2 py-1 rounded-lg border border-green-100 uppercase tracking-widest opacity-80">
+                                                    PAGO OK
+                                                </span>
+                                            @else
+                                                <span class="inline-flex w-full items-center justify-center bg-red-50 text-red-700 text-[8px] font-bold px-2 py-1 rounded-lg border border-red-100 uppercase tracking-widest opacity-80">
+                                                    DEBE PAGAR
                                                 </span>
                                             @endif
                                             
                                             <!-- Kit Status -->
                                             @if($reg->kit_delivered_at)
-                                                <span class="inline-flex w-full items-center justify-center bg-orange-50 text-orange-700 text-[9px] font-black px-2 py-1.5 rounded-lg border border-orange-200 uppercase tracking-widest shadow-sm">
-                                                    <svg class="w-3 h-3 mr-1 text-orange-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg> KIT ENTREGADO
+                                                <span class="inline-flex w-full items-center justify-center bg-purple-50 text-purple-700 text-[8px] font-bold px-2 py-1 rounded-lg border border-purple-100 uppercase tracking-widest opacity-80">
+                                                    KIT ENTREGADO
                                                 </span>
                                             @else
-                                                <span class="inline-flex w-full items-center justify-center bg-gray-50 text-gray-500 text-[9px] font-black px-2 py-1.5 rounded-lg border border-gray-200 uppercase tracking-widest">
-                                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> SIN KIT AÚN
+                                                <span class="inline-flex w-full items-center justify-center bg-gray-50 text-gray-400 text-[8px] font-bold px-2 py-1 rounded-lg border border-gray-100 uppercase tracking-widest opacity-80">
+                                                    SIN KIT
                                                 </span>
                                             @endif
                                         </div>
