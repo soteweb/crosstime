@@ -1,63 +1,64 @@
 <div class="space-y-12 pb-12">
-    <!-- Hero Carousel Section (AlpineJS) -->
-    <div x-data="{
-            activeSlide: 0,
-            slides: [
-                @foreach(App\Models\Event::whereNotNull('featured_image')->where('is_active', true)->where('date', '>=', now()->startOfDay())->take(3)->get() as $e)
-                { 
-                    image: '{{ Str::startsWith($e->featured_image, "http") ? $e->featured_image : asset("storage/" . $e->featured_image) }}', 
-                    subtitle: '{{ Str::limit($e->location_address, 20) }}', 
-                    title: '{{ addslashes($e->title) }}',
-                    url: '{{ route('event.show', $e) }}'
-                }{{ $loop->last ? '' : ',' }}
-                @endforeach
-            ]
-        }"
-        x-init="setInterval(() => activeSlide = (activeSlide === slides.length - 1) ? 0 : activeSlide + 1, 4000)"
-        class="relative w-full h-[300px] md:h-[500px] rounded-3xl overflow-hidden shadow-2xl mt-4 bg-gray-100 border border-gray-200 hidden md:block"
-    >
-        <!-- Alpine Slides -->
-        <template x-for="(slide, index) in slides" :key="index">
-            <a :href="slide.url" 
-                 x-show="activeSlide === index" 
-                 x-transition:enter="transition ease-out duration-1000"
-                 x-transition:enter-start="opacity-0 scale-105"
-                 x-transition:enter-end="opacity-100 scale-100"
-                 x-transition:leave="transition ease-in duration-1000"
-                 x-transition:leave-start="opacity-100 scale-100"
-                 x-transition:leave-end="opacity-0 scale-105"
-                 class="absolute inset-0 group">
-                
-                <img :src="slide.image" class="w-full h-full object-contain md:object-cover opacity-90 mix-blend-multiply group-hover:scale-105 transition-transform duration-[2000ms]" :alt="slide.title">
-                
-                <!-- Gradient Overlay Light -->
-                <div class="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent mix-blend-normal"></div>
-                <div class="absolute inset-0 bg-gradient-to-r from-white via-white/50 to-transparent"></div>
-                
-                <!-- Text Overlay -->
-                <div class="absolute bottom-10 left-6 md:left-12 md:bottom-16">
-                    <span class="px-4 py-1.5 bg-red-600 text-white text-xs font-bold uppercase rounded-full shadow-md mb-4 inline-block" x-text="slide.subtitle"></span>
-                    <h2 class="text-3xl md:text-6xl font-extrabold text-gray-900 tracking-tighter drop-shadow-sm group-hover:text-red-600 transition-colors" x-text="slide.title"></h2>
-                    <div class="mt-4 flex items-center gap-3">
-                        <p class="text-sm md:text-lg text-gray-600 max-w-2xl font-medium drop-shadow-sm">
-                            Encuentra las mejores competencias deportivas en un solo lugar.
-                        </p>
-                        <div class="hidden md:flex bg-red-600 text-white p-2 rounded-full shadow-lg group-hover:translate-x-2 transition-transform">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+    <div class="hidden md:block">
+        <div x-data="{
+                activeSlide: 0,
+                slides: [
+                    @foreach(App\Models\Event::whereNotNull('featured_image')->where('is_active', true)->where('date', '>=', now()->startOfDay())->take(3)->get() as $e)
+                    { 
+                        image: '{{ Str::startsWith($e->featured_image, "http") ? $e->featured_image : asset("storage/" . $e->featured_image) }}', 
+                        subtitle: '{{ Str::limit($e->location_address, 20) }}', 
+                        title: '{{ addslashes($e->title) }}',
+                        url: '{{ route('event.show', $e) }}'
+                    }{{ $loop->last ? '' : ',' }}
+                    @endforeach
+                ]
+            }"
+            x-init="setInterval(() => activeSlide = (activeSlide === slides.length - 1) ? 0 : activeSlide + 1, 4000)"
+            class="relative w-full h-[300px] md:h-[500px] rounded-3xl overflow-hidden shadow-2xl mt-4 bg-gray-100 border border-gray-200"
+        >
+            <!-- Alpine Slides -->
+            <template x-for="(slide, index) in slides" :key="index">
+                <a :href="slide.url" 
+                     x-show="activeSlide === index" 
+                     x-transition:enter="transition ease-out duration-1000"
+                     x-transition:enter-start="opacity-0 scale-105"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-1000"
+                     x-transition:leave-start="opacity-100 scale-100"
+                     x-transition:leave-end="opacity-0 scale-105"
+                     class="absolute inset-0 group">
+                    
+                    <img :src="slide.image" class="w-full h-full object-contain md:object-cover opacity-90 mix-blend-multiply group-hover:scale-105 transition-transform duration-[2000ms]" :alt="slide.title">
+                    
+                    <!-- Gradient Overlay Light -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent mix-blend-normal"></div>
+                    <div class="absolute inset-0 bg-gradient-to-r from-white via-white/50 to-transparent"></div>
+                    
+                    <!-- Text Overlay -->
+                    <div class="absolute bottom-10 left-6 md:left-12 md:bottom-16">
+                        <span class="px-4 py-1.5 bg-red-600 text-white text-xs font-bold uppercase rounded-full shadow-md mb-4 inline-block" x-text="slide.subtitle"></span>
+                        <h2 class="text-3xl md:text-6xl font-extrabold text-gray-900 tracking-tighter drop-shadow-sm group-hover:text-red-600 transition-colors" x-text="slide.title"></h2>
+                        <div class="mt-4 flex items-center gap-3">
+                            <p class="text-sm md:text-lg text-gray-600 max-w-2xl font-medium drop-shadow-sm">
+                                Encuentra las mejores competencias deportivas en un solo lugar.
+                            </p>
+                            <div class="hidden md:flex bg-red-600 text-white p-2 rounded-full shadow-lg group-hover:translate-x-2 transition-transform">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </a>
-        </template>
-
-        <!-- Indicators -->
-        <div class="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
-            <template x-for="(slide, index) in slides" :key="index">
-                <button @click="activeSlide = index" 
-                        class="w-3 h-3 rounded-full transition-all duration-300 shadow-sm border border-gray-300"
-                        :class="activeSlide === index ? 'bg-red-600 w-8 border-red-600' : 'bg-gray-300 hover:bg-gray-400'">
-                </button>
+                </a>
             </template>
+
+            <!-- Indicators -->
+            <div class="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
+                <template x-for="(slide, index) in slides" :key="index">
+                    <button @click="activeSlide = index" 
+                            class="w-3 h-3 rounded-full transition-all duration-300 shadow-sm border border-gray-300"
+                            :class="activeSlide === index ? 'bg-red-600 w-8 border-red-600' : 'bg-gray-300 hover:bg-gray-400'">
+                    </button>
+                </template>
+            </div>
         </div>
     </div>
 
