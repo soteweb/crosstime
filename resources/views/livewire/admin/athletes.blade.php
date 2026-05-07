@@ -127,25 +127,43 @@
                             @forelse($registrations as $reg)
                                 <tr class="hover:bg-gray-50 transition-colors">
                                     <td class="p-4">
-                                        <p class="text-sm font-bold text-gray-900">{{ $reg->athlete->name }} {{ $reg->athlete->last_name }}</p>
-                                        <p class="text-[10px] text-gray-500 font-medium uppercase tracking-tighter">{{ $reg->athlete->identity_document }} • {{ $reg->athlete->phone }}</p>
+                                        <div class="flex items-center gap-2">
+                                            <p class="text-sm font-bold text-gray-900">{{ $reg->athlete->name }} {{ $reg->athlete->last_name }}</p>
+                                            @if($reg->bib_number)
+                                                <span class="bg-gray-900 text-white text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-widest shadow-sm">#{{ $reg->bib_number }}</span>
+                                            @endif
+                                        </div>
+                                        <p class="text-[10px] text-gray-500 font-medium uppercase tracking-tighter mt-1">{{ $reg->athlete->identity_document }} • {{ $reg->athlete->phone }}</p>
                                     </td>
                                     <td class="p-4">
-                                        <div x-data="{ open: false, btnRect: {} }">
-                                            <button
-                                                @click="btnRect = $el.getBoundingClientRect(); open = !open"
-                                                class="w-full group">
-                                                @if($reg->status === 'pre_inscribed')
-                                                    <span class="block bg-yellow-50 text-yellow-700 text-[10px] font-black px-2 py-1 rounded-lg border border-yellow-200 text-center uppercase tracking-tighter group-hover:bg-yellow-100 transition-colors">Pre Inscripto</span>
-                                                @elseif($reg->status === 'inscribed')
-                                                    <span class="block bg-blue-50 text-blue-700 text-[10px] font-black px-2 py-1 rounded-lg border border-blue-100 text-center uppercase tracking-tighter group-hover:bg-blue-100 transition-colors">Inscripto</span>
-                                                @else
-                                                    <span class="block bg-green-50 text-green-700 text-[10px] font-black px-2 py-1 rounded-lg border border-green-200 text-center uppercase tracking-tighter group-hover:bg-green-100 transition-colors">Acreditado {{ $reg->bib_number ? '#' . $reg->bib_number : '' }}</span>
-                                                @endif
-                                                <p class="text-[9px] text-gray-400 font-bold mt-1 text-center uppercase flex items-center justify-center gap-1">
-                                                    {{ $reg->payment_method }}
-                                                    <svg class="w-2.5 h-2.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/></svg>
-                                                </p>
+                                        <div class="space-y-1.5 w-full">
+                                            <!-- Payment Status -->
+                                            @if($reg->payment_status === 'paid')
+                                                <span class="inline-flex w-full items-center justify-center bg-green-50 text-green-700 text-[9px] font-black px-2 py-1.5 rounded-lg border border-green-200 uppercase tracking-widest">
+                                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> PAGO OK
+                                                </span>
+                                            @else
+                                                <span class="inline-flex w-full items-center justify-center bg-red-50 text-red-700 text-[9px] font-black px-2 py-1.5 rounded-lg border border-red-200 uppercase tracking-widest">
+                                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> DEBE PAGAR
+                                                </span>
+                                            @endif
+                                            
+                                            <!-- Kit Status -->
+                                            @if($reg->kit_delivered_at)
+                                                <span class="inline-flex w-full items-center justify-center bg-orange-50 text-orange-700 text-[9px] font-black px-2 py-1.5 rounded-lg border border-orange-200 uppercase tracking-widest shadow-sm">
+                                                    <svg class="w-3 h-3 mr-1 text-orange-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg> KIT ENTREGADO
+                                                </span>
+                                            @else
+                                                <span class="inline-flex w-full items-center justify-center bg-gray-50 text-gray-500 text-[9px] font-black px-2 py-1.5 rounded-lg border border-gray-200 uppercase tracking-widest">
+                                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> SIN KIT AÚN
+                                                </span>
+                                            @endif
+                                        </div>
+
+                                        <div x-data="{ open: false, btnRect: {} }" class="mt-2">
+                                            <button @click="btnRect = $el.getBoundingClientRect(); open = !open" class="w-full bg-white border border-gray-200 hover:border-red-300 hover:text-red-600 text-gray-600 text-[9px] font-bold py-1.5 rounded-lg uppercase flex items-center justify-center transition-all group shadow-sm">
+                                                Administrar
+                                                <svg class="w-3 h-3 ml-1 text-gray-400 group-hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                             </button>
 
                                             {{-- Fixed-position dropdown via teleport to avoid overflow clipping --}}

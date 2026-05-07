@@ -200,7 +200,7 @@
                                     </div>
                                 @else
                                     <label class="block text-xs font-black text-gray-400 uppercase tracking-widest text-center">Asignar Nº de Dorsal</label>
-                                    <input type="text" wire:model="assigned_bib_number" 
+                                    <input type="text" wire:model.live="assigned_bib_number" 
                                            placeholder="EJ: 405" 
                                            class="w-full rounded-2xl border-2 border-gray-200 bg-white focus:border-red-600 focus:ring-red-600 text-center text-4xl font-black p-4 uppercase transition-all shadow-inner">
                                     
