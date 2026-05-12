@@ -81,7 +81,7 @@
         <div class="mt-6 flex flex-wrap gap-4">
             <div class="bg-red-50 px-4 py-2 rounded-xl border border-red-100 flex items-center">
                 <div class="w-2 h-2 rounded-full bg-red-600 mr-2"></div>
-                <span class="text-xs font-bold text-red-700">{{ $metrics['kits_delivered'] }} Participantes listos</span>
+                <span class="text-xs font-bold text-red-700">{{ $metrics['kits_delivered'] }} Acreditados listos</span>
             </div>
             <div class="bg-gray-50 px-4 py-2 rounded-xl border border-gray-200 flex items-center">
                 <div class="w-2 h-2 rounded-full bg-gray-300 mr-2"></div>

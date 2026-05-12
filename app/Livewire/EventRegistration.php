@@ -56,7 +56,7 @@ class EventRegistration extends Component
                 $statusLabels = [
                     'pre_inscribed' => 'Pre Inscripto',
                     'inscribed' => 'Inscripto',
-                    'participant' => 'Participante'
+                    'participant' => 'Acreditado'
                 ];
                 $label = $statusLabels[$existing->status] ?? 'Inscripto';
                 $this->addError('identity_document', "Este atleta ya se encuentra {$label}.");

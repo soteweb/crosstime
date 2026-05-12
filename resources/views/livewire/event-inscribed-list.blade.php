@@ -50,7 +50,7 @@
                                         </span>
                                     @else
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-800 uppercase border border-green-200">
-                                            Participante {{ $reg->bib_number ? '#' . $reg->bib_number : '' }}
+                                            ACREDITADO {{ $reg->bib_number ? '#' . $reg->bib_number : '' }}
                                         </span>
                                     @endif
                                 </td>
