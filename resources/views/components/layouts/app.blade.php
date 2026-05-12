@@ -37,7 +37,7 @@
                     
                     <!-- Desktop Menu -->
                     <div class="hidden md:flex items-center space-x-6">
-                        <a href="{{ route('home') }}" class="text-sm text-gray-600 hover:text-red-600 rounded-md font-bold transition-colors uppercase tracking-widest">Eventos</a>
+                        <a href="{{ route('home') }}" class="text-sm text-gray-600 hover:text-red-600 rounded-md font-bold transition-colors uppercase tracking-widest">Inicio</a>
                         @foreach(\App\Models\MenuItem::where('placement', 'header')->orderBy('order')->get() as $menu)
                             <a href="{{ str_starts_with($menu->url, 'http') ? $menu->url : url($menu->url) }}" target="{{ $menu->target }}" class="text-sm text-gray-600 hover:text-red-600 rounded-md font-bold transition-colors uppercase tracking-widest">{{ $menu->name }}</a>
                         @endforeach
@@ -66,7 +66,7 @@
                  x-transition:leave-start="opacity-100 translate-y-0" 
                  x-transition:leave-end="opacity-0 -translate-y-2">
                 <div class="px-4 pt-2 pb-6 space-y-1">
-                    <a href="{{ route('home') }}" class="block px-3 py-4 text-sm font-bold text-gray-900 border-b border-gray-50 uppercase tracking-widest hover:bg-gray-50 hover:text-red-600 transition-colors">Eventos</a>
+                    <a href="{{ route('home') }}" class="block px-3 py-4 text-sm font-bold text-gray-900 border-b border-gray-50 uppercase tracking-widest hover:bg-gray-50 hover:text-red-600 transition-colors">Inicio</a>
                     @foreach(\App\Models\MenuItem::where('placement', 'header')->orderBy('order')->get() as $menu)
                         <a href="{{ str_starts_with($menu->url, 'http') ? $menu->url : url($menu->url) }}" target="{{ $menu->target }}" class="block px-3 py-4 text-sm font-bold text-gray-900 border-b border-gray-50 uppercase tracking-widest hover:bg-gray-50 hover:text-red-600 transition-colors">{{ $menu->name }}</a>
                     @endforeach
