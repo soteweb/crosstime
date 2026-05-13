@@ -193,7 +193,7 @@
                     @else
                         @if($event->registration_type === 'external')
                             <a href="{{ $event->external_registration_url }}" target="_blank" class="block w-full bg-gradient-to-b from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white text-center font-black py-5 rounded-2xl transition-all shadow-xl shadow-blue-500/40 mb-4 flex items-center justify-center text-xs uppercase tracking-widest">
-                                Registrarme Externo
+                                Inscribirme Ahora
                                 <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                             </a>
                         @else
@@ -206,7 +206,7 @@
                         @if($event->external_inscribed_url)
                             <a href="{{ $event->external_inscribed_url }}" target="_blank" class="block w-full mt-4 bg-white border border-blue-200 text-blue-900 text-center font-bold py-4 rounded-2xl hover:bg-blue-50 transition-all uppercase tracking-widest text-[10px] flex items-center justify-center shadow-sm">
                                 <svg class="w-3 h-3 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                                Ver Inscriptos (Externo)
+                                Ver Inscriptos
                             </a>
                         @else
                             <a href="{{ route('event.inscriptos', $event) }}" class="block w-full mt-4 bg-white border border-gray-200 text-gray-900 text-center font-bold py-4 rounded-2xl hover:bg-gray-50 transition-all uppercase tracking-widest text-[10px] flex items-center justify-center">
