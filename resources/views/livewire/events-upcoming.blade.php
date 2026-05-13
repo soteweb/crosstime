@@ -89,7 +89,7 @@
                     </h3>
                     
                     <p class="text-gray-600 text-sm mb-4 line-clamp-2 break-all md:break-words">
-                        {{ strip_tags($event->description) }}
+                        {{ html_entity_decode(strip_tags($event->description)) }}
                     </p>
 
                     <div class="flex flex-col space-y-2 text-sm text-gray-500 mb-6 font-medium mt-auto">
