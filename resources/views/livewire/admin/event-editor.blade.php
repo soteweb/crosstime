@@ -85,7 +85,7 @@
                     @if($registration_type === 'external')
                         <div class="animate-fadeIn p-4 bg-white rounded-xl border border-blue-200 shadow-sm">
                             <label class="block text-[10px] font-black text-blue-600 uppercase mb-2 tracking-widest">URL de Inscripción Externa</label>
-                            <input type="url" wire:model="external_registration_url" placeholder="https://plataforma-externa.com/evento-xyz" class="w-full rounded-lg border-blue-100 bg-blue-50/30 focus:border-blue-500 focus:ring-blue-500 font-bold p-3 text-sm">
+                            <input type="url" wire:model="external_registration_url" placeholder="https://plataforma-externa.com/inscripcion" class="w-full rounded-lg border-blue-100 bg-blue-50/30 focus:border-blue-500 focus:ring-blue-500 font-bold p-3 text-sm">
                         </div>
                     @else
                     @if($registration_type === 'local')
@@ -298,6 +298,12 @@
                                 <option value="{{ $type->id }}">{{ $type->name }}</option>
                             @endforeach
                         </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-600 mb-2">Lista de Inscriptos (Enlace Externo)</label>
+                        <input type="url" wire:model="external_inscribed_url" placeholder="https://..." class="w-full rounded-xl border-gray-200 bg-gray-50 focus:border-orange-500 focus:ring-orange-500 font-bold p-3 text-sm">
+                        <p class="text-[10px] text-gray-400 mt-1 font-bold uppercase tracking-widest">Para mostrar una lista en otra plataforma.</p>
                     </div>
 
                     <div>

@@ -27,6 +27,7 @@ class EventEditor extends Component
     public $google_maps_url = '';
     public $registration_type = 'local';
     public $external_registration_url = '';
+    public $external_inscribed_url = '';
     public $registration_deadline = '';
     public $payment_instructions = '';
     public $start_time = '';
@@ -58,6 +59,7 @@ class EventEditor extends Component
             $this->google_maps_url = $e->google_maps_url;
             $this->registration_type = $e->registration_type ?? 'local';
             $this->external_registration_url = $e->external_registration_url;
+            $this->external_inscribed_url = $e->external_inscribed_url;
             $this->registration_deadline = $e->registration_deadline ? $e->registration_deadline->format('Y-m-d\TH:i') : '';
             $this->payment_instructions = $e->payment_instructions;
             $this->start_time = $e->start_time;
@@ -136,6 +138,7 @@ class EventEditor extends Component
             'google_maps_url' => 'nullable|url',
             'registration_type' => 'required|in:local,external',
             'external_registration_url' => 'required_if:registration_type,external|nullable|url',
+            'external_inscribed_url' => 'nullable|url',
             'registration_deadline' => 'nullable|date',
             'distances.*.name' => 'required_if:registration_type,local|string|max:255',
             'categories.*.name' => 'required_if:registration_type,local|string|max:255',
@@ -162,6 +165,7 @@ class EventEditor extends Component
             'google_maps_url' => $this->google_maps_url,
             'registration_type' => $this->registration_type,
             'external_registration_url' => $this->external_registration_url,
+            'external_inscribed_url' => $this->external_inscribed_url,
             'registration_deadline' => $this->registration_deadline ?: null,
             'payment_instructions' => $this->payment_instructions,
             'start_time' => $this->start_time,

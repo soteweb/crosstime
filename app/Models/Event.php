@@ -19,6 +19,7 @@ class Event extends Model
         'google_maps_url',
         'registration_type',
         'external_registration_url',
+        'external_inscribed_url',
         'registration_settings',
         'registration_deadline',
         'payment_instructions',
