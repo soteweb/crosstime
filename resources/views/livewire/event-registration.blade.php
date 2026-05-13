@@ -114,8 +114,20 @@
                         </div>
                         <div class="reg-field">
                             <label class="reg-label">Club / Asociación</label>
-                            <input type="text" wire:model="club" placeholder="Opcional" class="reg-input">
+                            <select wire:model.live="club_id" class="reg-select">
+                                <option value="">-- Seleccionar --</option>
+                                @foreach($this->availableClubs as $aclub)
+                                    <option value="{{ $aclub->id }}">{{ $aclub->name }}</option>
+                                @endforeach
+                                <option value="other">Otro (Escribir nombre)</option>
+                            </select>
                         </div>
+                        @if($club_id === 'other' || empty($this->availableClubs))
+                        <div class="reg-field animate-fadeIn">
+                            <label class="reg-label">Nombre del Club</label>
+                            <input type="text" wire:model="club" placeholder="Ej: Club Ciclista XYZ" class="reg-input">
+                        </div>
+                        @endif
                         <div class="reg-field">
                             <label class="reg-label">WhatsApp</label>
                             <input type="text" wire:model="phone" placeholder="Ej: 0981..." class="reg-input">

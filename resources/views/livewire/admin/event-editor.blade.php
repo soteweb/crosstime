@@ -221,6 +221,36 @@
                                 <p class="text-[10px] text-blue-500 mt-2 font-bold uppercase tracking-widest">Este texto se mostrará al atleta cuando elija ese método de pago.</p>
                             </div>
                             @endif
+
+                            <!-- Clubs Selection -->
+                            <div class="p-6 bg-white rounded-xl border border-gray-200 shadow-sm mt-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="text-sm font-black text-gray-900 uppercase tracking-widest">Clubes Participantes</h4>
+                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Opcional</span>
+                                </div>
+                                <p class="text-[10px] text-gray-500 mb-4 font-bold uppercase tracking-widest leading-relaxed">
+                                    Si seleccionas clubes específicos, los atletas solo podrán elegir entre ellos. Si lo dejas vacío, podrán elegir cualquier club de la base de datos global.
+                                </p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-60 overflow-y-auto p-2 bg-gray-50 rounded-lg border border-gray-100">
+                                    @foreach($clubsList as $club)
+                                        <label class="flex items-center p-2 bg-white rounded-lg border border-gray-100 cursor-pointer hover:border-red-200 transition-colors group">
+                                            <input type="checkbox" wire:model="selected_clubs" value="{{ $club->id }}" class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-600">
+                                            <div class="ml-3 flex items-center gap-2">
+                                                @if($club->logo)
+                                                    <img src="{{ asset('storage/' . $club->logo) }}" class="w-5 h-5 rounded object-cover">
+                                                @endif
+                                                <span class="text-xs font-bold text-gray-700 group-hover:text-red-600 transition-colors">{{ $club->name }}</span>
+                                            </div>
+                                        </label>
+                                    @endforeach
+                                </div>
+                                @if($clubsList->isEmpty())
+                                    <div class="text-center py-4">
+                                        <p class="text-xs text-gray-400 font-bold uppercase tracking-widest">No hay clubes registrados.</p>
+                                        <a href="{{ route('admin.clubs') }}" class="text-[10px] text-red-600 font-black uppercase hover:underline mt-1 block">Gestionar Clubes</a>
+                                    </div>
+                                @endif
+                            </div>
                         </div>
                     @endif
                 @endif

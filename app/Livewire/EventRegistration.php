@@ -20,6 +20,7 @@ class EventRegistration extends Component
     public $gender = '';
     public $blood_type = '';
     public $club = '';
+    public $club_id = null;
     public $carnet_number = '';
     public $date_of_birth = '';
     public $city = '';
@@ -68,6 +69,7 @@ class EventRegistration extends Component
             $this->gender = $athlete->gender;
             $this->blood_type = $athlete->blood_type;
             $this->club = $athlete->club;
+            $this->club_id = $athlete->club_id;
             $this->carnet_number = $athlete->carnet_number;
             $this->date_of_birth = $athlete->date_of_birth ? $athlete->date_of_birth->format('Y-m-d') : '';
             $this->city = $athlete->city;
@@ -133,6 +135,19 @@ class EventRegistration extends Component
             });
     }
 
+    public function getAvailableClubsProperty()
+    {
+        $query = \App\Models\Club::where('is_active', true);
+        
+        $eventClubs = $this->event->clubs()->pluck('clubs.id');
+        
+        if ($eventClubs->isNotEmpty()) {
+            $query->whereIn('id', $eventClubs);
+        }
+
+        return $query->orderBy('name')->get();
+    }
+
     public function goToStep4()
     {
         $rules = [
@@ -168,6 +183,7 @@ class EventRegistration extends Component
                 'gender' => $this->gender,
                 'blood_type' => $this->blood_type,
                 'club' => $this->club,
+                'club_id' => is_numeric($this->club_id) ? $this->club_id : null,
                 'carnet_number' => $this->carnet_number,
                 'date_of_birth' => $this->date_of_birth,
                 'city' => $this->city,

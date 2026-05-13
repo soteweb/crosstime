@@ -23,6 +23,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function() {
     Route::get('/events/create', \App\Livewire\Admin\EventEditor::class)->name('admin.events.create');
     Route::get('/events/{event}/edit', \App\Livewire\Admin\EventEditor::class)->name('admin.events.edit');
     Route::get('/event-types', \App\Livewire\Admin\EventTypeAdmin::class)->name('admin.event-types');
+    Route::get('/clubs', \App\Livewire\Admin\ClubAdmin::class)->name('admin.clubs');
     Route::get('/pages', \App\Livewire\Admin\PagesAdmin::class)->name('admin.pages');
     Route::get('/pages/create', \App\Livewire\Admin\PageEditor::class)->name('admin.pages.create');
     Route::get('/pages/{page}/edit', \App\Livewire\Admin\PageEditor::class)->name('admin.pages.edit');

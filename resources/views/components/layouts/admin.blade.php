@@ -57,14 +57,14 @@
 
         <!-- Desktop Sidebar -->
         <aside class="hidden md:flex w-64 bg-white border-r border-gray-200 flex-col sticky top-0 h-screen shadow-sm">
-            <div class="h-20 flex items-center px-6 border-b border-gray-100">
+            <div class="h-20 flex flex-shrink-0 items-center px-6 border-b border-gray-100">
                 <img src="{{ asset('img/logo.jpg') }}" alt="Logo" class="h-10 w-auto mr-3 rounded-xl shadow-sm">
                 <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest opacity-60">by Itapúa Cross</span>
             </div>
-            <nav class="flex-1 px-4 py-6 space-y-2">
+            <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto custom-scrollbar">
                 @include('components.layouts.admin-nav')
             </nav>
-            <div class="px-6 py-4 border-t border-gray-200 space-y-4">
+            <div class="px-6 py-4 border-t border-gray-200 space-y-4 flex-shrink-0 bg-gray-50/50">
                 <a href="{{ route('home') }}" class="flex items-center text-sm font-bold text-gray-500 hover:text-red-600 transition-colors cursor-pointer">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                     Volver al Frontend

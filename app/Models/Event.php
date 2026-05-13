@@ -49,6 +49,11 @@ class Event extends Model
         return $this->belongsTo(EventType::class);
     }
 
+    public function clubs()
+    {
+        return $this->belongsToMany(Club::class);
+    }
+
     public function getRouteKeyName()
     {
         return 'slug';

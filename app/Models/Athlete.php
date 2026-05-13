@@ -18,6 +18,7 @@ class Athlete extends Model
         'gender',
         'blood_type',
         'club',
+        'club_id',
         'carnet_number',
         'date_of_birth',
         'city',
@@ -31,5 +32,10 @@ class Athlete extends Model
     public function registrations()
     {
         return $this->hasMany(Registration::class);
+    }
+
+    public function managedClub()
+    {
+        return $this->belongsTo(Club::class, 'club_id');
     }
 }

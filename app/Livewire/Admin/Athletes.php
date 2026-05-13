@@ -15,12 +15,13 @@ class Athletes extends Component
 
     public $search = '';
     public $filter_event = '';
-    public $tab = 'registrations'; // 'registrations' or 'athletes'
+    public $tab = 'registrations'; // 'registrations', 'athletes', 'checkin'
+    public $showFullList = false;
     
-    public $view = 'list'; // 'list', 'registration', 'edit_athlete', 'import', 'bib_assignment'
+    public $view = 'list'; // 'list', 'registration', 'edit_athlete', 'import', 'bib_assignment', 'detail'
+    public $selectedRegistrationId;
     public $importFile;
     public $editingAthleteId;
-    public $selectedRegistrationId;
     public $bib_number = '';
     public $bibIsEdit = false;
     public $whatsappUrl = '';
@@ -34,6 +35,7 @@ class Athletes extends Component
     public $email = '';
     public $blood_type = '';
     public $club = '';
+    public $club_id = null;
     public $carnet_number = '';
     public $city = '';
     public $country = 'Paraguay';
@@ -53,6 +55,22 @@ class Athletes extends Component
     public $payment_notes = '';
     public $payment_date = '';
 
+    public function togglePaymentStatus($id)
+    {
+        $reg = Registration::find($id);
+        if ($reg) {
+            if ($reg->status === 'paid' || $reg->status === 'inscribed') {
+                $reg->status = 'pre_inscribed';
+                $reg->payment_status = 'pending';
+            } else {
+                $reg->status = 'paid';
+                $reg->payment_status = 'paid';
+            }
+            $reg->save();
+            session()->flash('message', 'Estado de inscripción actualizado.');
+        }
+    }
+
     public function changeStatus($registrationId, $newStatus)
     {
         $reg = Registration::find($registrationId);
@@ -60,13 +78,18 @@ class Athletes extends Component
             if ($newStatus === 'participant') {
                 $this->selectedRegistrationId = $registrationId;
                 $this->bib_number = $reg->bib_number ?? '';
-                $this->bibIsEdit = false;
+                $this->bibIsEdit = $reg->status === 'participant';
                 $this->view = 'bib_assignment';
                 return;
             }
 
             if ($newStatus === 'inscribed' && $reg->payment_status !== 'paid') {
                 $this->openPayment($registrationId);
+                return;
+            }
+
+            if ($newStatus === 'pre_inscribed') {
+                $this->revertToPreInscribed($registrationId);
                 return;
             }
 
@@ -92,18 +115,30 @@ class Athletes extends Component
         $this->payment_reference = '';
         $this->payment_notes = '';
         $this->payment_date = now()->format('Y-m-d');
+        $this->bib_number = $reg->bib_number ?? '';
         $this->view = 'payment_validation';
     }
 
     public function savePayment()
     {
         $this->validate([
-            'payment_amount' => 'required|numeric|min:0',
             'payment_method' => 'required',
             'payment_date' => 'required|date',
+            'bib_number' => 'required|string',
         ]);
 
         $reg = Registration::findOrFail($this->selectedRegistrationId);
+        
+        // Validate Bib Uniqueness in this event
+        $exists = Registration::where('event_id', $reg->event_id)
+            ->where('bib_number', $this->bib_number)
+            ->where('id', '!=', $reg->id)
+            ->exists();
+
+        if ($exists) {
+            $this->addError('bib_number', 'Este número de dorsal ya está asignado en este evento.');
+            return;
+        }
         
         \App\Models\Payment::create([
             'registration_id' => $reg->id,
@@ -116,8 +151,11 @@ class Athletes extends Component
 
         $reg->update([
             'payment_status' => 'paid',
-            'status' => 'inscribed'
+            'status' => 'inscribed',
+            'bib_number' => $this->bib_number
         ]);
+
+        $this->whatsappUrl = $this->generateWhatsAppUrl($reg);
 
         $this->view = 'list';
         $this->reset(['selectedRegistrationId', 'payment_amount', 'payment_reference', 'payment_notes']);
@@ -139,6 +177,22 @@ class Athletes extends Component
     {
         $reg = Registration::find($this->selectedRegistrationId);
         if ($reg) {
+            if (empty($this->bib_number)) {
+                session()->flash('error', 'El número de dorsal es obligatorio.');
+                return;
+            }
+
+            // Validar unicidad del dorsal en este evento
+            $exists = Registration::where('event_id', $reg->event_id)
+                ->where('bib_number', $this->bib_number)
+                ->where('id', '!=', $reg->id)
+                ->exists();
+
+            if ($exists) {
+                session()->flash('error', "El dorsal #{$this->bib_number} ya está asignado a otro atleta en este evento.");
+                return;
+            }
+
             $reg->status = 'participant';
             $reg->bib_number = $this->bib_number;
             $reg->payment_status = 'paid';
@@ -151,16 +205,101 @@ class Athletes extends Component
         $this->view = 'list';
 
         $wasEdit = $this->bibIsEdit;
-
-        if (!$wasEdit) {
-            $this->whatsappUrl = $this->generateWhatsAppUrl($reg);
-        }
-
+        
         $this->reset(['selectedRegistrationId', 'bib_number', 'bibIsEdit']);
         session()->flash('message', $wasEdit
-            ? 'Dorsal actualizado a #' . $reg->bib_number
-            : 'Atleta acreditado con Dorsal #' . $reg->bib_number
+            ? 'Dorsal actualizado correctamente.'
+            : 'Kit entregado y atleta acreditado.'
         );
+    }
+
+    public function revertToPreInscribed($registrationId)
+    {
+        $reg = Registration::find($registrationId);
+        if ($reg) {
+            $reg->update([
+                'status' => 'pre_inscribed',
+                'payment_status' => 'pending',
+                'bib_number' => null
+            ]);
+            // Optional: Delete payments associated? 
+            // For now just change status to keep it safe.
+            session()->flash('message', 'Atleta revertido a Pre-Inscripto. Se ha removido el dorsal.');
+        }
+    }
+
+    public function confirmKitDelivery($registrationId)
+    {
+        $reg = Registration::find($registrationId);
+        if ($reg) {
+            // 1. Validar que tenga un dorsal (en DB o en el input de pantalla)
+            $bibToAssign = $reg->bib_number ?: $this->bib_number;
+
+            if (empty($bibToAssign)) {
+                session()->flash('error', 'Debes asignar un dorsal antes de acreditar.');
+                return;
+            }
+
+            // 2. Validar unicidad del dorsal
+            $exists = Registration::where('event_id', $reg->event_id)
+                ->where('bib_number', $bibToAssign)
+                ->where('id', '!=', $reg->id)
+                ->exists();
+
+            if ($exists) {
+                session()->flash('error', "El dorsal #{$bibToAssign} ya está asignado a otro participante en este evento.");
+                return;
+            }
+
+            // 3. Validar estado de pago
+            if ($reg->payment_status !== 'paid' && $this->payment_amount <= 0) {
+                session()->flash('error', 'No se puede acreditar un atleta con pago pendiente.');
+                return;
+            }
+
+            $reg->update([
+                'status' => 'participant',
+                'bib_number' => $bibToAssign,
+                'kit_delivered_at' => now(),
+                'kit_delivered_by' => auth()->id(),
+                'payment_status' => 'paid'
+            ]);
+
+            session()->flash('message', "Kit entregado a {$reg->athlete->name} (Dorsal #{$bibToAssign})");
+            
+            $this->whatsappUrl = $this->generateWhatsAppUrl($reg);
+        }
+    }
+
+    public function selectRegistration($id)
+    {
+        $reg = Registration::with(['payments', 'category', 'distance'])->findOrFail($id);
+        $this->selectedRegistrationId = $id;
+        $this->bib_number = $reg->bib_number ?? '';
+        
+        $this->selected_event_id = $reg->event_id;
+        $this->selected_distance_id = $reg->event_distance_id;
+        $this->selected_category_id = $reg->event_category_id;
+        $this->tshirt_size = $reg->tshirt_size;
+
+        $lastPayment = $reg->payments()->latest()->first();
+        $this->payment_amount = $lastPayment ? $lastPayment->amount : ($reg->category?->price ?? 0);
+        $this->payment_method = $lastPayment ? $lastPayment->payment_method : ($reg->payment_method ?: 'Efectivo');
+        $this->payment_reference = $lastPayment ? $lastPayment->reference : '';
+        
+        $this->view = 'detail';
+    }
+
+    public function updateRegistrationDetails()
+    {
+        $reg = Registration::findOrFail($this->selectedRegistrationId);
+        $reg->update([
+            'event_distance_id' => $this->selected_distance_id,
+            'event_category_id' => $this->selected_category_id,
+            'tshirt_size' => $this->tshirt_size,
+        ]);
+
+        session()->flash('message', 'Detalles de inscripción actualizados.');
     }
 
     public function openRegistration()
@@ -169,8 +308,18 @@ class Athletes extends Component
         $this->view = 'registration';
     }
 
-    public function cancel()
+    public function setTab($tab)
     {
+        $this->tab = $tab;
+        $this->view = 'list';
+        // Quitamos el reseteo de filter_event para que persista la navegación
+        $this->search = '';
+    }
+
+    public function setFilterEvent($eventId)
+    {
+        $this->filter_event = $eventId;
+        $this->tab = 'registrations';
         $this->view = 'list';
     }
 
@@ -184,6 +333,12 @@ class Athletes extends Component
             $this->date_of_birth = $athlete->date_of_birth ? $athlete->date_of_birth->format('Y-m-d') : '';
             $this->phone = $athlete->phone;
             $this->email = $athlete->email;
+            $this->blood_type = $athlete->blood_type;
+            $this->club = $athlete->club;
+            $this->club_id = $athlete->club_id;
+            $this->carnet_number = $athlete->carnet_number;
+            $this->city = $athlete->city;
+            $this->country = $athlete->country ?? 'Paraguay';
         }
     }
 
@@ -193,9 +348,27 @@ class Athletes extends Component
             'identity_document' => 'required',
             'name' => 'required',
             'last_name' => 'required',
+            'gender' => 'required',
+            'date_of_birth' => 'required|date',
+            'phone' => 'required',
+            'email' => 'required|email',
             'selected_event_id' => 'required',
+            'selected_distance_id' => 'required',
             'selected_category_id' => 'required',
         ]);
+
+        // Evitar duplicados: Un atleta no puede estar 2 veces en el mismo evento
+        $athlete = \App\Models\Athlete::where('identity_document', $this->identity_document)->first();
+        if ($athlete) {
+            $exists = Registration::where('athlete_id', $athlete->id)
+                ->where('event_id', $this->selected_event_id)
+                ->exists();
+            
+            if ($exists) {
+                session()->flash('error', 'Este atleta ya se encuentra inscripto en este evento.');
+                return;
+            }
+        }
 
         $athlete = \App\Models\Athlete::updateOrCreate(
             ['identity_document' => $this->identity_document],
@@ -206,23 +379,48 @@ class Athletes extends Component
                 'date_of_birth' => $this->date_of_birth,
                 'phone' => $this->phone,
                 'email' => $this->email,
+                'blood_type' => $this->blood_type,
+                'club' => $this->club_id ? \App\Models\Club::find($this->club_id)?->name : null,
+                'club_id' => $this->club_id ?: null,
+                'carnet_number' => $this->carnet_number,
+                'city' => $this->city,
+                'country' => $this->country,
             ]
         );
 
-        Registration::create([
+        $registration = \App\Models\Registration::create([
             'athlete_id' => $athlete->id,
             'event_id' => $this->selected_event_id,
-            'event_distance_id' => $this->selected_distance_id ?: null,
+            'event_distance_id' => $this->selected_distance_id,
             'event_category_id' => $this->selected_category_id,
-            'payment_method' => $this->payment_method,
-            'payment_status' => $this->payment_status,
-            'status' => $this->payment_status === 'paid' ? 'inscribed' : 'pre_inscribed',
             'tshirt_size' => $this->tshirt_size,
-            'waiver_accepted_at' => now(),
+            'status' => 'inscribed',
+            'payment_status' => 'pending'
         ]);
 
-        $this->view = 'list';
-        session()->flash('message', 'Inscripción manual realizada con éxito.');
+        session()->flash('message', 'Inscripción manual exitosa para ' . $athlete->name);
+        $this->setTab('registrations');
+    }
+
+    public function viewAthlete($id)
+    {
+        $athlete = Athlete::findOrFail($id);
+        $this->editingAthleteId = $athlete->id;
+        $this->identity_document = $athlete->identity_document;
+        $this->name = $athlete->name;
+        $this->last_name = $athlete->last_name;
+        $this->gender = $athlete->gender;
+        $this->date_of_birth = $athlete->date_of_birth ? $athlete->date_of_birth->format('Y-m-d') : '';
+        $this->phone = $athlete->phone;
+        $this->email = $athlete->email;
+        $this->blood_type = $athlete->blood_type;
+        $this->club = $athlete->club;
+        $this->club_id = $athlete->club_id;
+        $this->carnet_number = $athlete->carnet_number;
+        $this->city = $athlete->city;
+        $this->country = $athlete->country ?? 'Paraguay';
+        
+        $this->view = 'view_athlete';
     }
 
     public function editAthlete($id)
@@ -238,11 +436,26 @@ class Athletes extends Component
         $this->email = $athlete->email;
         $this->blood_type = $athlete->blood_type;
         $this->club = $athlete->club;
+        $this->club_id = $athlete->club_id;
         $this->carnet_number = $athlete->carnet_number;
         $this->city = $athlete->city;
         $this->country = $athlete->country ?? 'Paraguay';
         
         $this->view = 'edit_athlete';
+    }
+
+    public function deleteAthlete($id)
+    {
+        $athlete = Athlete::findOrFail($id);
+        
+        // Check if has registrations
+        if ($athlete->registrations()->exists()) {
+            session()->flash('error', "No se puede eliminar al atleta {$athlete->name} porque tiene inscripciones activas.");
+            return;
+        }
+
+        $athlete->delete();
+        session()->flash('message', "Atleta eliminado correctamente.");
     }
 
     public function updateAthlete()
@@ -263,7 +476,8 @@ class Athletes extends Component
             'phone' => $this->phone,
             'email' => $this->email,
             'blood_type' => $this->blood_type,
-            'club' => $this->club,
+            'club' => $this->club_id ? \App\Models\Club::find($this->club_id)?->name : null,
+            'club_id' => $this->club_id ?: null,
             'carnet_number' => $this->carnet_number,
             'city' => $this->city,
             'country' => $this->country,
@@ -275,11 +489,23 @@ class Athletes extends Component
 
     public function deleteRegistration($id)
     {
-        if (auth()->user()->role === \App\Models\User::ROLE_STAFF) {
-            session()->flash('error', 'No tienes permisos para eliminar inscripciones.');
-            return;
+        $reg = Registration::find($id);
+        if ($reg) {
+            // En lugar de borrar, revertimos a pre-inscripto
+            $reg->update([
+                'status' => 'pre_inscribed',
+                'payment_status' => 'pending',
+                'bib_number' => null,
+                'kit_delivered_at' => null,
+                'kit_delivered_by' => null
+            ]);
+            
+            // También borramos los pagos asociados para que el balance sea real
+            $reg->payments()->delete();
+            
+            $this->view = 'list';
+            session()->flash('message', 'Inscripción revertida a Pre-Inscripto correctamente.');
         }
-        Registration::find($id)?->delete();
     }
 
     public function openImport()
@@ -416,27 +642,39 @@ class Athletes extends Component
 
     public function render()
     {
-        $registrations = $this->getRegistrationsQuery()->orderBy('created_at', 'desc')->get();
-        
-        // 1. Event list for Filter (Main Tab)
-        $eventsQuery = \App\Models\Event::query()->orderBy('date', 'desc');
-        if ($this->eventSearchTerm) {
-            $eventsQuery->where('title', 'ilike', '%' . $this->eventSearchTerm . '%');
-        }
-        $events = $eventsQuery->take(15)->get();
+        $allEvents = \App\Models\Event::orderBy('date', 'desc')->get();
+        $upcomingEvents = \App\Models\Event::where('date', '>=', now()->startOfDay())
+            ->orderBy('date', 'asc')
+            ->take(3)
+            ->get();
 
-        // 2. Event list for New Registration
-        $regEventsQuery = \App\Models\Event::query()->orderBy('date', 'desc');
-        if ($this->registrationEventSearchTerm) {
-            $regEventsQuery->where('title', 'ilike', '%' . $this->registrationEventSearchTerm . '%');
+        $registrationEvents = \App\Models\Event::where('is_active', true)
+            ->when($this->registrationEventSearchTerm, function($q) {
+                $q->where('title', 'ilike', '%'.$this->registrationEventSearchTerm.'%');
+            })->orderBy('date', 'desc')->get();
+
+        $selectedEvent = $this->selected_event_id ? \App\Models\Event::find($this->selected_event_id) : null;
+
+        $registrations = collect();
+        $isHub = false;
+
+        $this->tab = $this->tab ?: 'registrations';
+        $this->view = $this->view ?: 'list';
+
+        if ($this->tab === 'registrations' && $this->view === 'list') {
+            if (empty($this->filter_event) && empty($this->search) && !$this->showFullList) {
+                $isHub = true;
+            } else {
+                $isHub = false;
+                $registrations = $this->getRegistrationsQuery()
+                    ->orderBy('created_at', 'desc')
+                    ->paginate(20);
+            }
         }
-        $registrationEvents = $regEventsQuery->take(15)->get();
-        
-        $selectedEvent = $this->selected_event_id ? \App\Models\Event::with(['distances', 'categories'])->find($this->selected_event_id) : null;
         
         $athletesMaster = collect();
         if ($this->tab === 'athletes') {
-            $athletesQuery = Athlete::query();
+            $athletesQuery = \App\Models\Athlete::query();
             if ($this->search) {
                 $athletesQuery->where(function($q) {
                     $q->where('name', 'ilike', '%'.$this->search.'%')
@@ -447,15 +685,42 @@ class Athletes extends Component
             $athletesMaster = $athletesQuery->orderBy('last_name')->paginate(20);
         }
 
+        $checkinList = collect();
+        if ($this->tab === 'checkin') {
+            $checkinQuery = \App\Models\Registration::query();
+            
+            if ($this->filter_event) {
+                $checkinQuery->where('event_id', $this->filter_event);
+            }
+
+            if ($this->search) {
+                $checkinQuery->where(function($q) {
+                    $q->whereHas('athlete', function($inner) {
+                        $inner->where('name', 'ilike', '%'.$this->search.'%')
+                              ->orWhere('last_name', 'ilike', '%'.$this->search.'%')
+                              ->orWhere('identity_document', 'ilike', '%'.$this->search.'%');
+                    })->orWhere('bib_number', 'ilike', '%'.$this->search.'%');
+                });
+            }
+
+            if ($this->filter_event) {
+                $checkinList = $checkinQuery->orderBy('bib_number', 'asc')->paginate(30);
+            }
+        }
+
         return view('livewire.admin.athletes', [
             'registrations' => $registrations,
             'athletesMaster' => $athletesMaster,
-            'events' => $events,
+            'checkinList' => $checkinList,
+            'isHub' => $isHub,
+            'events' => $upcomingEvents,
+            'allEvents' => $allEvents,
             'registrationEvents' => $registrationEvents,
             'eventDistances' => $selectedEvent?->distances ?? collect(),
             'eventCategories' => $selectedEvent?->categories->when($this->selected_distance_id, function($q) {
                 return $q->where('event_distance_id', $this->selected_distance_id);
             }) ?? collect(),
+            'clubsList' => \App\Models\Club::where('is_active', true)->orderBy('name')->get(),
         ])->layout('components.layouts.admin', ['title' => 'Atletas / Inscripciones']);
     }
 }

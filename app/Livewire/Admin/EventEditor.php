@@ -33,6 +33,7 @@ class EventEditor extends Component
     public $organizer = '';
     public $results_url = '';
     public $is_active = true;
+    public $selected_clubs = [];
 
     // Registration Settings
     public $has_tshirts = false;
@@ -86,6 +87,8 @@ class EventEditor extends Component
                 'gender_restriction' => $c->gender_restriction,
                 'event_distance_id' => $c->event_distance_id
             ])->toArray();
+
+            $this->selected_clubs = $e->clubs->pluck('id')->toArray();
         }
 
         if (empty($this->tshirt_sizes)) {
@@ -212,6 +215,9 @@ class EventEditor extends Component
             $event->categories()->whereNotIn('id', $keepCategories)->delete();
         }
 
+        // Sync Clubs
+        $event->clubs()->sync($this->selected_clubs);
+
         session()->flash('message', $this->eventId ? 'Evento actualizado exitosamente.' : 'Evento creado exitosamente.');
         return redirect()->route('admin.events');
     }
@@ -220,6 +226,7 @@ class EventEditor extends Component
     {
         return view('livewire.admin.event-editor', [
             'eventTypes' => EventType::all(),
+            'clubsList' => \App\Models\Club::where('is_active', true)->orderBy('name')->get(),
             'eventDistances' => $this->eventId ? \App\Models\EventDistance::where('event_id', $this->eventId)->get() : collect()
         ]);
     }
