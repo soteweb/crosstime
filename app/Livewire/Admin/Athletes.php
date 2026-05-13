@@ -662,7 +662,7 @@ class Athletes extends Component
         $this->view = $this->view ?: 'list';
 
         if ($this->tab === 'registrations' && $this->view === 'list') {
-            if (empty($this->filter_event) && empty($this->search) && !$this->showFullList) {
+            if (empty($this->filter_event) && empty($this->search)) {
                 $isHub = true;
             } else {
                 $isHub = false;

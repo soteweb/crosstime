@@ -72,12 +72,17 @@
                                     <div class="lg:col-span-2 space-y-6">
                                         <div class="flex items-center justify-between">
                                             <h4 class="text-[10px] font-black text-red-600 uppercase tracking-widest flex items-center">
-                                                <span class="w-2 h-2 bg-red-600 rounded-full mr-2"></span> Eventos Próximos
+                                                <span class="w-2 h-2 bg-red-600 rounded-full mr-2"></span> 
+                                                {{ $showFullList ? 'Historial Completo de Eventos' : 'Eventos Próximos' }}
                                             </h4>
-                                            <button wire:click="$set('showFullList', true)" class="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-red-600 transition-colors">Ver todos los Eventos &rarr;</button>
+                                            @if(!$showFullList)
+                                                <button wire:click="$set('showFullList', true)" class="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-red-600 transition-colors">Ver todos los Eventos &rarr;</button>
+                                            @else
+                                                <button wire:click="$set('showFullList', false)" class="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-red-600 transition-colors">&larr; Ver solo Próximos</button>
+                                            @endif
                                         </div>
                                         <div class="grid grid-cols-1 gap-4">
-                                            @foreach($events as $e)
+                                            @foreach($showFullList ? $allEvents : $events as $e)
                                             <div wire:click="setFilterEvent('{{ $e->id }}')" class="bg-gray-50 p-6 rounded-3xl border border-transparent hover:border-red-500 cursor-pointer flex items-center justify-between group transition-all shadow-sm hover:shadow-xl hover:shadow-red-500/5" wire:key="hub-event-{{ $e->id }}">
                                                 <div>
                                                     <h5 class="text-lg font-black text-gray-900 uppercase group-hover:text-red-600 transition-colors">{{ $e->title }}</h5>
