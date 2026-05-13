@@ -229,9 +229,9 @@ class EventEditor extends Component
     public function render()
     {
         return view('livewire.admin.event-editor', [
-            'eventTypes' => EventType::all(),
+            'eventTypes' => \App\Models\EventType::all(),
             'clubsList' => \App\Models\Club::where('is_active', true)->orderBy('name')->get(),
             'eventDistances' => $this->eventId ? \App\Models\EventDistance::where('event_id', $this->eventId)->get() : collect()
-        ]);
+        ])->layout('components.layouts.admin', ['title' => $this->eventId ? 'Editar Evento' : 'Nuevo Evento']);
     }
 }

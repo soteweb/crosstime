@@ -41,6 +41,6 @@ class EventAdmin extends Component
 
         return view('livewire.event-admin', [
             'events' => $events
-        ]);
+        ])->layout('components.layouts.admin', ['title' => 'Gestión de Eventos']);
     }
 }

@@ -17,6 +17,6 @@ class EventShow extends Component
     public function render()
     {
         return view('livewire.event-show')
-            ->layout('components.layouts.app');
+            ->layout('components.layouts.app', ['title' => $this->event->title . ' - Itapúa Cross']);
     }
 }

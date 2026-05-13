@@ -105,6 +105,6 @@ class EventTypeAdmin extends Component
     {
         return view('livewire.admin.event-type-admin', [
             'types' => EventType::orderBy('id', 'desc')->get(),
-        ]);
+        ])->layout('components.layouts.admin', ['title' => 'Tipos de Evento']);
     }
 }

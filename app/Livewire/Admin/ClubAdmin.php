@@ -98,6 +98,6 @@ class ClubAdmin extends Component
     {
         return view('livewire.admin.club-admin', [
             'clubs' => Club::orderBy('name', 'asc')->get(),
-        ]);
+        ])->layout('components.layouts.admin', ['title' => 'Gestión de Clubes']);
     }
 }
