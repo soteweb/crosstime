@@ -94,23 +94,7 @@
                         <p class="text-gray-400 text-sm leading-relaxed max-w-xs">
                             Organización de Eventos Deportivos en Itapúa, Paraguay. Cicloturismo, Running, Carreras de Aventura y más.
                         </p>
-                        <div class="flex items-center gap-3 pt-2">
-                            <a href="{{ route('home') }}"
-                               class="inline-block bg-red-600 hover:bg-red-700 text-white text-xs font-black uppercase tracking-widest px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-red-900/30">
-                                Ver Eventos
-                            </a>
-                            @auth
-                            <a href="{{ route('admin.dashboard') }}"
-                               class="inline-block border border-white/10 text-gray-500 hover:text-white hover:border-white/30 text-xs font-bold uppercase tracking-widest px-4 py-2.5 rounded-xl transition-all">
-                                Admin →
-                            </a>
-                            @else
-                            <a href="{{ route('login') }}"
-                               class="text-gray-600 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors">
-                                Ingresar
-                            </a>
-                            @endauth
-                        </div>
+
                     </div>
 
                     <!-- Column 2: Quick Links -->
@@ -134,6 +118,17 @@
                             </li>
                             @empty
                             @endforelse
+                            <li>
+                                @auth
+                                <a href="{{ route('admin.dashboard') }}" class="text-gray-400 hover:text-white text-sm font-medium transition-colors">
+                                    Panel Admin
+                                </a>
+                                @else
+                                <a href="{{ route('login') }}" class="text-gray-400 hover:text-white text-sm font-medium transition-colors">
+                                    Ingresar
+                                </a>
+                                @endauth
+                            </li>
                         </ul>
                     </div>
 
@@ -143,6 +138,16 @@
                             CONTACTO
                         </h3>
                         <ul class="space-y-4">
+                            <li class="flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                                    </svg>
+                                </span>
+                                <a href="tel:+59571206649" class="text-gray-400 hover:text-white text-sm transition-colors">
+                                    Oficina: +59571206649
+                                </a>
+                            </li>
                             <li class="flex items-center gap-3">
                                 <span class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
                                     <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
