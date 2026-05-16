@@ -7,6 +7,6 @@
 
     <!-- Contenido Trix / CMS (Debe ser renderizado como HTML crudo) -->
     <div class="prose prose-lg prose-orange max-w-none prose-img:rounded-2xl prose-img:shadow-lg prose-headings:font-black bg-white p-8 md:p-12 rounded-3xl shadow-sm border border-gray-100 overflow-x-auto break-words">
-        {!! $page->content !!}
+        {!! clean($page->content) !!}
     </div>
 </div>

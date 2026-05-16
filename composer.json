@@ -10,7 +10,8 @@
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
         "laraveles/spanish": "^1.5",
-        "livewire/livewire": "^4.2"
+        "livewire/livewire": "^4.2",
+        "mews/purifier": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

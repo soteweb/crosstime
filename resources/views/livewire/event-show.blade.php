@@ -66,7 +66,7 @@
                         Información General
                     </h2>
                     <div class="prose prose-red max-w-none text-gray-600 leading-relaxed font-medium overflow-x-auto break-words">
-                        {!! $event->description !!}
+                        {!! clean($event->description) !!}
                     </div>
                 </div>
 
