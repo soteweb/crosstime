@@ -24,12 +24,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function() {
     Route::get('/check-in', \App\Livewire\Admin\CheckIn::class)->name('admin.check-in');
 
     // Rutas protegidas: Solo Super Admins y Organizadores
-    Route::middleware(function ($request, $next) {
-        if (!in_array(auth()->user()->role, [\App\Models\User::ROLE_SUPER_ADMIN, \App\Models\User::ROLE_ORGANIZER])) {
-            abort(403, 'No tienes permiso para acceder a esta sección.');
-        }
-        return $next($request);
-    })->group(function() {
+    Route::middleware([\App\Http\Middleware\CheckAdminRole::class])->group(function() {
         Route::get('/events', EventAdmin::class)->name('admin.events');
         Route::get('/events/create', \App\Livewire\Admin\EventEditor::class)->name('admin.events.create');
         Route::get('/events/{event}/edit', \App\Livewire\Admin\EventEditor::class)->name('admin.events.edit');
