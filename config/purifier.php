@@ -26,7 +26,7 @@ return [
         'default' => [
             'HTML.Doctype'             => 'HTML 4.01 Transitional',
             'HTML.Allowed'             => 'div[style|class],b,strong,i,em,u,a[href|title|target|rel|class],ul[style|class],ol[style|class],li[style|class],p[style|class],br,span[style|class],img[width|height|alt|src|class|style],h1[style|class],h2[style|class],h3[style|class],h4[style|class],h5[style|class],h6[style|class],blockquote[style|class],hr,table[class|style|border|cellspacing|cellpadding|width],colgroup[style|class|width],col[style|class|width],thead,tbody,tfoot,tr[class|style],td[class|style|colspan|rowspan|width|height],th[class|style|colspan|rowspan|width|height],figure[class|style],figcaption[class|style]',
-            'CSS.AllowedProperties'    => 'font,font-size,font-weight,font-style,font-family,text-decoration,padding,padding-left,padding-right,padding-top,padding-bottom,color,background,background-color,text-align,float,margin,margin-top,margin-bottom,margin-left,margin-right,width,height,border,border-collapse,border-radius,border-color,border-width,border-style,vertical-align,box-sizing',
+            'CSS.AllowedProperties'    => 'font,font-size,font-weight,font-style,font-family,text-decoration,padding,padding-left,padding-right,padding-top,padding-bottom,color,background,background-color,text-align,float,margin,margin-top,margin-bottom,margin-left,margin-right,width,height,border,border-collapse,border-color,border-width,border-style,vertical-align',
             'AutoFormat.AutoParagraph' => true,
             'AutoFormat.RemoveEmpty'   => false,
         ],
