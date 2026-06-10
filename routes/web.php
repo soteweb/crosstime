@@ -41,8 +41,11 @@ Route::middleware(['auth'])->prefix('admin')->group(function() {
 
         // TinyMCE image upload endpoint
         Route::post('/upload-image', function (\Illuminate\Http\Request $request) {
-            $request->validate(['file' => 'required|image|max:4096']);
-            $path = $request->file('file')->store('cms', 'public');
+            $request->validate(['file' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:4096']);
+            $file = $request->file('file');
+            $extension = $file->getClientOriginalExtension();
+            $filename = \Illuminate\Support\Str::uuid() . '.' . $extension;
+            $path = $file->storeAs('cms', $filename, 'public');
             return response()->json(['location' => asset('storage/' . $path)]);
         })->name('admin.upload-image');
     });

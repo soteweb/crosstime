@@ -106,9 +106,9 @@ class EventRegistration extends Component
     {
         if (!$this->date_of_birth || !$this->gender) return collect();
 
-        $birthDate = new \DateTime($this->date_of_birth);
-        $today = new \DateTime();
-        $age = $today->diff($birthDate)->y;
+        $birthYear = (int) (new \DateTime($this->date_of_birth))->format('Y');
+        $eventYear = $this->event->date ? (int) (new \DateTime($this->event->date))->format('Y') : (int) date('Y');
+        $age = $eventYear - $birthYear;
 
         return $this->event->categories
             ->filter(function ($cat) use ($age) {
@@ -160,7 +160,10 @@ class EventRegistration extends Component
         }
 
         if ($this->event->registration_settings['has_tshirts'] ?? false) {
-            $rules['tshirt_size'] = 'required';
+            $category = $this->event->categories->firstWhere('id', $this->selected_category_id);
+            if (!$category || $category->includes_tshirt) {
+                $rules['tshirt_size'] = 'required';
+            }
         }
 
         $this->validate($rules);
@@ -204,12 +207,17 @@ class EventRegistration extends Component
             return;
         }
 
+        // Calculate next bib number
+        $maxBib = Registration::where('event_id', $this->event->id)->max('bib_number');
+        $nextBib = $maxBib ? ((int)$maxBib) + 1 : 1;
+
         // Create Registration
         Registration::create([
             'event_id' => $this->event->id,
             'event_category_id' => $this->selected_category_id,
             'athlete_id' => $athlete->id,
             'event_distance_id' => $this->selected_distance_id,
+            'bib_number' => (string)$nextBib,
             'payment_status' => 'pending',
             'status' => 'pre_inscribed',
             'payment_method' => $this->payment_method,

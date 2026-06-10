@@ -220,11 +220,15 @@ class Athletes extends Component
             $reg->update([
                 'status' => 'pre_inscribed',
                 'payment_status' => 'pending',
-                'bib_number' => null
+                'bib_number' => null,
+                'kit_delivered_at' => null,
+                'kit_delivered_by' => null
             ]);
-            // Optional: Delete payments associated? 
-            // For now just change status to keep it safe.
-            session()->flash('message', 'Atleta revertido a Pre-Inscripto. Se ha removido el dorsal.');
+            
+            $reg->payments()->delete();
+            
+            $this->view = 'list';
+            session()->flash('message', 'Inscripción revertida a Pre-Inscripto correctamente.');
         }
     }
 
@@ -286,6 +290,7 @@ class Athletes extends Component
         $this->payment_amount = $lastPayment ? $lastPayment->amount : ($reg->category?->price ?? 0);
         $this->payment_method = $lastPayment ? $lastPayment->payment_method : ($reg->payment_method ?: 'Efectivo');
         $this->payment_reference = $lastPayment ? $lastPayment->reference : '';
+        $this->payment_date = $lastPayment ? $lastPayment->payment_date : now()->format('Y-m-d');
         
         $this->view = 'detail';
     }
@@ -491,20 +496,14 @@ class Athletes extends Component
     {
         $reg = Registration::find($id);
         if ($reg) {
-            // En lugar de borrar, revertimos a pre-inscripto
-            $reg->update([
-                'status' => 'pre_inscribed',
-                'payment_status' => 'pending',
-                'bib_number' => null,
-                'kit_delivered_at' => null,
-                'kit_delivered_by' => null
-            ]);
-            
-            // También borramos los pagos asociados para que el balance sea real
-            $reg->payments()->delete();
-            
-            $this->view = 'list';
-            session()->flash('message', 'Inscripción revertida a Pre-Inscripto correctamente.');
+            if ($reg->status === 'pre_inscribed') {
+                $reg->payments()->delete();
+                $reg->delete();
+                $this->view = 'list';
+                session()->flash('message', 'Inscripción eliminada correctamente del listado.');
+            } else {
+                session()->flash('error', 'Solo se pueden eliminar de forma definitiva las inscripciones en estado Pre-Inscripto. Si desea borrar este atleta, primero reviértalo a Pre-Inscripto.');
+            }
         }
     }
 
@@ -583,36 +582,66 @@ class Athletes extends Component
 
     public function exportToCSV()
     {
-        $registrations = $this->getRegistrationsQuery()->orderBy('created_at', 'desc')->get();
+        $query = $this->getRegistrationsQuery()->orderBy('created_at', 'desc');
 
         $filename = "inscripciones_" . now()->format('Y-m-d_H-i') . ".csv";
         $headers = [
-            "Content-type" => "text/csv",
+            "Content-type" => "text/csv; charset=UTF-8",
             "Content-Disposition" => "attachment; filename=$filename",
             "Pragma" => "no-cache",
             "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
             "Expires" => "0"
         ];
 
-        $callback = function() use ($registrations) {
+        $callback = function() use ($query) {
             $file = fopen('php://output', 'w');
-            fputcsv($file, ['ID', 'CI', 'Nombre', 'Apellido', 'Dorsal', 'Evento', 'Distancia', 'Categoria', 'Pago', 'Talle', 'Fecha']);
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF)); // BOM para Excel
+            
+            fputcsv($file, [
+                'ID', 'Evento', 'Distancia', 'Categoria', 'Dorsal', 
+                'Documento CI', 'Nombres', 'Apellidos', 'Genero', 'Fecha Nacimiento', 
+                'Edad (Evento)', 'Telefono', 'Email', 'Ciudad', 'Pais', 
+                'Grupo Sanguineo', 'Club', 'Numero Carnet', 'Talle Remera', 
+                'Estado Pago', 'Metodo Pago', 'Estado', 'Fecha Inscripcion', 'Observaciones'
+            ]);
 
-            foreach ($registrations as $reg) {
-                fputcsv($file, [
-                    $reg->id,
-                    $reg->athlete->identity_document,
-                    $reg->athlete->name,
-                    $reg->athlete->last_name,
-                    $reg->bib_number ?? '-',
-                    $reg->event->title ?? 'N/A',
-                    $reg->distance->name ?? 'N/A',
-                    $reg->category->name ?? 'N/A',
-                    $reg->payment_status,
-                    $reg->tshirt_size,
-                    $reg->created_at->format('d/m/Y H:i'),
-                ]);
-            }
+            $query->chunk(200, function($registrations) use ($file) {
+                foreach ($registrations as $reg) {
+                    $age = '-';
+                    if ($reg->athlete->date_of_birth) {
+                        $birthYear = (int) \Carbon\Carbon::parse($reg->athlete->date_of_birth)->format('Y');
+                        $eventYear = $reg->event && $reg->event->date ? (int) \Carbon\Carbon::parse($reg->event->date)->format('Y') : (int) date('Y');
+                        $age = $eventYear - $birthYear;
+                    }
+
+                    fputcsv($file, [
+                        $reg->id,
+                        $reg->event->title ?? '-',
+                        $reg->distance->name ?? '-',
+                        $reg->category->name ?? '-',
+                        $reg->bib_number ?? '-',
+                        $reg->athlete->identity_document ?? '-',
+                        $reg->athlete->name ?? '-',
+                        $reg->athlete->last_name ?? '-',
+                        $reg->athlete->gender ?? '-',
+                        $reg->athlete->date_of_birth ? \Carbon\Carbon::parse($reg->athlete->date_of_birth)->format('d/m/Y') : '-',
+                        $age,
+                        $reg->athlete->phone ?? '-',
+                        $reg->athlete->email ?? '-',
+                        $reg->athlete->city ?? '-',
+                        $reg->athlete->country ?? '-',
+                        $reg->athlete->blood_type ?? '-',
+                        $reg->athlete->club ?? '-',
+                        $reg->athlete->carnet_number ?? '-',
+                        $reg->tshirt_size ?? '-',
+                        $reg->payment_status ?? '-',
+                        $reg->payment_method ?? '-',
+                        $reg->status ?? '-',
+                        $reg->created_at->format('d/m/Y H:i'),
+                        $reg->observation ?? '-',
+                    ]);
+                }
+            });
             fclose($file);
         };
 

@@ -14,6 +14,11 @@ class EventCategory extends Model
         'max_age',
         'gender_restriction',
         'event_distance_id',
+        'includes_tshirt',
+    ];
+
+    protected $casts = [
+        'includes_tshirt' => 'boolean',
     ];
 
     public function event()

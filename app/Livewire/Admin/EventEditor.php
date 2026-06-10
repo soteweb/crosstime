@@ -87,7 +87,8 @@ class EventEditor extends Component
                 'min_age' => $c->min_age,
                 'max_age' => $c->max_age,
                 'gender_restriction' => $c->gender_restriction,
-                'event_distance_id' => $c->event_distance_id
+                'event_distance_id' => $c->event_distance_id,
+                'includes_tshirt' => $c->includes_tshirt ?? true,
             ])->toArray();
 
             $this->selected_clubs = $e->clubs->pluck('id')->toArray();
@@ -118,7 +119,8 @@ class EventEditor extends Component
             'min_age' => null,
             'max_age' => null,
             'gender_restriction' => null,
-            'event_distance_id' => null
+            'event_distance_id' => null,
+            'includes_tshirt' => true
         ];
     }
 
@@ -212,6 +214,7 @@ class EventEditor extends Component
                         'max_age' => $cat['max_age'],
                         'gender_restriction' => $cat['gender_restriction'] ?: null,
                         'event_distance_id' => $cat['event_distance_id'] ?: null,
+                        'includes_tshirt' => $cat['includes_tshirt'] ?? true,
                     ]
                 );
                 $keepCategories[] = $c->id;

@@ -42,11 +42,6 @@ class FinanceReport extends Component
             $event = Event::with(['categories', 'distances'])->find($this->selected_event_id);
             
             if ($event) {
-                // Total Collected
-                $stats['total_collected'] = Payment::whereHas('registration', function($q) {
-                    $q->where('event_id', $this->selected_event_id);
-                })->sum('amount');
-
                 // Breakdown by method
                 $stats['by_method'] = Payment::whereHas('registration', function($q) {
                     $q->where('event_id', $this->selected_event_id);
@@ -55,6 +50,9 @@ class FinanceReport extends Component
                 ->groupBy('payment_method')
                 ->get();
 
+                // Total Collected
+                $stats['total_collected'] = $stats['by_method']->sum('total');
+
                 // Breakdown by category
                 $stats['by_category'] = Registration::where('registrations.event_id', $this->selected_event_id)
                     ->join('event_categories', 'registrations.event_category_id', '=', 'event_categories.id')
@@ -62,9 +60,13 @@ class FinanceReport extends Component
                     ->groupBy('event_categories.name')
                     ->get();
 
-                // Counts
-                $stats['registrations_count'] = Registration::where('event_id', $this->selected_event_id)->count();
-                $stats['paid_count'] = Registration::where('event_id', $this->selected_event_id)->where('payment_status', 'paid')->count();
+                // Counts in one query
+                $counts = Registration::where('event_id', $this->selected_event_id)
+                    ->select(DB::raw('COUNT(*) as total'), DB::raw("SUM(CASE WHEN payment_status = 'paid' THEN 1 ELSE 0 END) as paid"))
+                    ->first();
+                    
+                $stats['registrations_count'] = $counts->total ?? 0;
+                $stats['paid_count'] = $counts->paid ?? 0;
                 
                 // Estimation of pending
                 $stats['pending_amount'] = Registration::where('registrations.event_id', $this->selected_event_id)

@@ -16,19 +16,26 @@ class UsersAdmin extends Component
 
     public function mount()
     {
+        $this->checkAccess();
+    }
+
+    private function checkAccess()
+    {
         if (auth()->user()->role !== User::ROLE_SUPER_ADMIN) {
-            abort(403);
+            abort(403, 'No autorizado.');
         }
     }
 
     public function openCreate()
     {
+        $this->checkAccess();
         $this->reset(['name', 'email', 'password', 'role', 'selected_user_id']);
         $this->view = 'create';
     }
 
     public function saveUser()
     {
+        $this->checkAccess();
         $this->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
@@ -49,6 +56,7 @@ class UsersAdmin extends Component
 
     public function editUser($id)
     {
+        $this->checkAccess();
         $user = User::findOrFail($id);
         $this->selected_user_id = $user->id;
         $this->name = $user->name;
@@ -60,6 +68,7 @@ class UsersAdmin extends Component
 
     public function updateUser()
     {
+        $this->checkAccess();
         $this->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $this->selected_user_id,
@@ -85,6 +94,8 @@ class UsersAdmin extends Component
 
     public function deleteUser($id)
     {
+        $this->checkAccess();
+        
         if (auth()->id() == $id) {
             session()->flash('error', 'No puedes eliminarte a ti mismo.');
             return;

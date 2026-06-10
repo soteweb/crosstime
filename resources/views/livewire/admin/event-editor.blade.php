@@ -168,6 +168,13 @@
                                                     </select>
                                                 </div>
                                             </div>
+                                            
+                                            <div class="mt-4 pt-3 border-t border-gray-100 flex items-center">
+                                                <label class="flex items-center cursor-pointer group">
+                                                    <input type="checkbox" wire:model="categories.{{ $index }}.includes_tshirt" class="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500">
+                                                    <span class="ml-2 text-[10px] font-black text-gray-500 uppercase tracking-widest group-hover:text-orange-600 transition-colors">Atletas reciben remera en esta categoría</span>
+                                                </label>
+                                            </div>
                                         </div>
                                     @endforeach
                                 </div>

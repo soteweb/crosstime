@@ -8,6 +8,12 @@
             </div>
             <div class="flex flex-wrap md:flex-nowrap gap-3">
                 @if($view === 'list')
+                    @if($tab === 'registrations' && !$isHub)
+                        <button wire:click="exportToCSV" class="px-4 py-2 bg-green-600 text-white text-xs font-bold rounded-xl hover:bg-green-700 transition-all shadow-lg flex items-center justify-center">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            Exportar Excel
+                        </button>
+                    @endif
                     <button wire:click="openRegistration" class="px-4 py-2 bg-gray-900 text-white text-xs font-bold rounded-xl hover:bg-red-600 transition-all shadow-lg flex items-center justify-center">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                         Nueva Inscripción
@@ -170,6 +176,11 @@
                                                 </td>
                                                 <td class="p-4 text-right">
                                                     <div class="flex justify-end gap-1">
+                                                        @if($reg->status === 'pre_inscribed')
+                                                            <button onclick="confirm('¿Estás seguro de eliminar esta inscripción por completo?') || event.stopImmediatePropagation()" wire:click="deleteRegistration({{ $reg->id }})" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Eliminar Inscripción">
+                                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                            </button>
+                                                        @endif
                                                         <button wire:click="selectRegistration({{ $reg->id }})" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Gestionar Inscripción">
                                                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                                                         </button>
@@ -528,7 +539,7 @@
                                     <p class="text-[9px] font-black text-green-400 uppercase mb-1">Acreditado el</p>
                                     <p class="text-sm font-black">{{ \Carbon\Carbon::parse($reg->kit_delivered_at)->format('d/m, H:i') }}hs</p>
                                 </div>
-                                <button onclick="confirm('¿Revertir acreditación?') || event.stopImmediatePropagation()" wire:click="deleteRegistration({{ $reg->id }})" class="text-[9px] font-black text-gray-500 uppercase hover:text-red-500 transition-colors">Volver a Pre-Inscripto</button>
+                                <button onclick="confirm('¿Revertir acreditación?') || event.stopImmediatePropagation()" wire:click="revertToPreInscribed({{ $reg->id }})" class="text-[9px] font-black text-gray-500 uppercase hover:text-red-500 transition-colors">Volver a Pre-Inscripto</button>
                             @else
                                 <p class="text-xs text-gray-400 mb-6 font-medium">Confirma la entrega del kit físico al atleta.</p>
                                 <button wire:click="confirmKitDelivery({{ $reg?->id }})" class="w-full py-6 bg-green-600 text-white font-black rounded-3xl text-lg uppercase tracking-tighter shadow-2xl hover:bg-green-500 transition-all">ACREDITAR</button>
@@ -543,7 +554,7 @@
                         <button wire:click="editAthlete({{ $reg?->athlete_id }})" class="px-5 py-2.5 bg-white text-gray-700 text-[10px] font-black uppercase rounded-xl border border-gray-200">Editar Atleta</button>
                     </div>
                     <div class="flex gap-4 items-center">
-                        <button onclick="confirm('¿Anular inscripción?') || event.stopImmediatePropagation()" wire:click="deleteRegistration({{ $reg?->id }})" class="text-[10px] font-black text-red-600 uppercase hover:text-red-800 transition-colors">Anular y Revertir</button>
+                        <button onclick="confirm('¿Anular inscripción?') || event.stopImmediatePropagation()" wire:click="revertToPreInscribed({{ $reg?->id }})" class="text-[10px] font-black text-red-600 uppercase hover:text-red-800 transition-colors">Anular y Revertir</button>
                         <button wire:click="setTab('registrations')" class="px-8 py-3 bg-gray-900 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg hover:bg-red-600 transition-all">Cerrar y Volver</button>
                     </div>
                 </div>

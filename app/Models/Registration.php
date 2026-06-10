@@ -18,6 +18,8 @@ class Registration extends Model
         'observation',
         'status',
         'kit_delivered_by',
+        'bib_number',
+        'kit_delivered_at',
     ];
 
     public function deliveredBy()

@@ -186,7 +186,7 @@
                         <div class="space-y-2">
                             @forelse($this->availableCategories as $cat)
                                 <label class="cursor-pointer block group">
-                                    <input type="radio" wire:model="selected_category_id" value="{{ $cat->id }}" class="peer sr-only">
+                                    <input type="radio" wire:model.live="selected_category_id" value="{{ $cat->id }}" class="peer sr-only">
                                     <div class="p-4 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-between peer-checked:border-red-600 peer-checked:bg-red-50 transition-all group-hover:border-gray-300">
                                         <div>
                                             <p class="font-black text-gray-800 uppercase tracking-tight">{{ $cat->name }}</p>
@@ -209,7 +209,8 @@
                         @error('selected_category_id') <span class="reg-error mt-2">{{ $message }}</span> @enderror
                     </div>
 
-                    @if($event->registration_settings['has_tshirts'] ?? false)
+                    @if(($event->registration_settings['has_tshirts'] ?? false) && 
+                        ($selected_category_id ? ($event->categories->find($selected_category_id)->includes_tshirt ?? true) : true))
                         <div>
                             <label class="reg-label mb-3 block">Talle de Remera</label>
                             <div class="flex flex-wrap gap-2">

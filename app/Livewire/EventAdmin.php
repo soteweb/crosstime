@@ -32,12 +32,14 @@ class EventAdmin extends Component
         }
     }
 
+    use \Livewire\WithPagination;
+
     public function render()
     {
         $events = Event::with(['categories', 'eventType'])
             ->where('title', 'ilike', '%' . $this->search . '%')
             ->orderBy('date', 'desc')
-            ->get();
+            ->paginate(20);
 
         return view('livewire.event-admin', [
             'events' => $events
