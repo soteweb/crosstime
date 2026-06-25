@@ -208,7 +208,7 @@ class EventRegistration extends Component
         }
 
         // Calculate next bib number
-        $maxBib = Registration::where('event_id', $this->event->id)->max('bib_number');
+        $maxBib = Registration::where('event_id', $this->event->id)->max(\DB::raw('CAST(bib_number AS UNSIGNED)'));
         $nextBib = $maxBib ? ((int)$maxBib) + 1 : 1;
 
         // Create Registration
