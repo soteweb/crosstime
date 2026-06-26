@@ -24,7 +24,7 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-gray-900 text-white">
-                            <th class="p-5 text-xs font-bold uppercase tracking-widest">Orden</th>
+                            <th class="p-5 text-xs font-bold uppercase tracking-widest">Dorsal</th>
                             <th class="p-5 text-xs font-bold uppercase tracking-widest">Estado</th>
                             <th class="p-5 text-xs font-bold uppercase tracking-widest">Nombre y Apellido</th>
                             <th class="p-5 text-xs font-bold uppercase tracking-widest text-center">Género</th>
@@ -37,7 +37,7 @@
                         @forelse($registrations as $index => $reg)
                             <tr class="hover:bg-orange-50/30 transition-colors">
                                 <td class="p-5 font-black text-gray-400 text-sm">
-                                    #{{ $index + 1 }}
+                                    {{ $reg->bib_number ? '#' . $reg->bib_number : '-' }}
                                 </td>
                                 <td class="p-5">
                                     @if($reg->status === 'pre_inscribed')
