@@ -169,11 +169,20 @@
                 
                 <!-- Main CTA Card -->
                 <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl border border-gray-100 sticky top-8">
-                    @php $isPast = now()->startOfDay()->gt($event->date); @endphp
+                    @php 
+                        $isPast = now()->startOfDay()->gt($event->date); 
+                        $registrationClosed = $event->registration_deadline && now()->gt($event->registration_deadline);
+                    @endphp
 
                     <div class="text-center mb-8">
                         <h3 class="text-2xl font-black text-gray-900 uppercase tracking-tighter">
-                            {{ $isPast ? 'Evento Finalizado' : 'Inscripciones' }}
+                            @if($isPast)
+                                Evento Finalizado
+                            @elseif($registrationClosed)
+                                Inscripciones Cerradas
+                            @else
+                                Inscripciones
+                            @endif
                         </h3>
                         @if($event->organizer)
                             <p class="text-[10px] font-black text-red-600 uppercase tracking-[0.2em] mt-2">Organiza: {{ $event->organizer }}</p>
@@ -186,21 +195,27 @@
                                 Ver Resultados
                             </a>
                         @else
-                            <div class="py-5 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl text-center text-gray-400 font-bold uppercase text-xs tracking-widest">
+                            <div class="py-5 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl text-center text-gray-400 font-bold uppercase text-xs tracking-widest mb-4">
                                 Resultados Pendientes
                             </div>
                         @endif
                     @else
-                        @if($event->registration_type === 'external')
-                            <a href="{{ $event->external_registration_url }}" target="_blank" class="block w-full bg-gradient-to-b from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white text-center font-black py-5 rounded-2xl transition-all shadow-xl shadow-blue-500/40 mb-4 flex items-center justify-center text-xs uppercase tracking-widest">
-                                Inscribirme Ahora
-                                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                            </a>
+                        @if($registrationClosed)
+                            <div class="py-5 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl text-center text-gray-400 font-bold uppercase text-xs tracking-widest mb-4">
+                                Inscripciones Cerradas
+                            </div>
                         @else
-                            <a href="{{ route('events.register', ['event' => $event]) }}" class="block w-full bg-gradient-to-b from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white text-center font-black py-5 rounded-2xl transition-all shadow-xl shadow-red-500/40 mb-4 flex items-center justify-center text-xs uppercase tracking-widest">
-                                Inscribirme Ahora
-                                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                            </a>
+                            @if($event->registration_type === 'external')
+                                <a href="{{ $event->external_registration_url }}" target="_blank" class="block w-full bg-gradient-to-b from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white text-center font-black py-5 rounded-2xl transition-all shadow-xl shadow-blue-500/40 mb-4 flex items-center justify-center text-xs uppercase tracking-widest">
+                                    Inscribirme Ahora
+                                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                </a>
+                            @else
+                                <a href="{{ route('events.register', ['event' => $event]) }}" class="block w-full bg-gradient-to-b from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white text-center font-black py-5 rounded-2xl transition-all shadow-xl shadow-red-500/40 mb-4 flex items-center justify-center text-xs uppercase tracking-widest">
+                                    Inscribirme Ahora
+                                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                </a>
+                            @endif
                         @endif
 
                         @if($event->external_inscribed_url)
