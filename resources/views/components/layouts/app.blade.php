@@ -6,10 +6,11 @@
 
         <title>{{ $title ?? 'Itapúa Cross' }}</title>
 
-        <!-- Google Fonts: Plus Jakarta Sans -->
+        <!-- Google Fonts: Plus Jakarta Sans & Material Symbols -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
 
         <style>
             body { font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -25,36 +26,34 @@
     <body class="bg-gray-50 text-gray-900 min-h-screen antialiased overflow-x-hidden w-full">
         
         <!-- Header -->
-        <header class="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50" x-data="{ mobileMenuOpen: false }">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between h-20">
-                    <div class="flex items-center">
-                        <a href="{{ route('home') }}" class="flex items-center group">
-                            <img src="{{ asset('img/logo.jpg') }}" alt="Logo Itapúa Cross" class="h-12 w-auto mr-4 rounded-xl shadow-sm group-hover:scale-105 transition-transform">
-                            <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest opacity-60 hidden sm:inline">by Itapúa Cross</span>
-                        </a>
-                    </div>
-                    
-                    <!-- Desktop Menu -->
-                    <div class="hidden md:flex items-center space-x-6">
-                        <a href="{{ route('home') }}" class="text-sm text-gray-600 hover:text-red-600 rounded-md font-bold transition-colors uppercase tracking-widest">Inicio</a>
-                        @foreach(\App\Models\MenuItem::where('placement', 'header')->orderBy('order')->get() as $menu)
-                            <a href="{{ str_starts_with($menu->url, 'http') ? $menu->url : url($menu->url) }}" target="{{ $menu->target }}" class="text-sm text-gray-600 hover:text-red-600 rounded-md font-bold transition-colors uppercase tracking-widest">{{ $menu->name }}</a>
-                        @endforeach
-                    </div>
+        <header class="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50 h-16 transition-colors" x-data="{ mobileMenuOpen: false }">
+            <div class="h-full px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex justify-between items-center">
+                <a href="{{ route('home') }}" class="flex items-center gap-2 group">
+                    <img src="{{ asset('img/logo.jpg') }}" alt="Logo Itapúa Cross" class="h-10 w-auto rounded-xl shadow-sm group-hover:scale-105 transition-transform">
+                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest opacity-60 hidden sm:inline">by Itapúa Cross</span>
+                </a>
+                
+                <!-- Desktop Menu -->
+                <nav class="hidden md:flex items-center gap-8">
+                    <a href="{{ route('home') }}" class="text-gray-600 hover:text-red-600 transition-colors text-xs font-bold tracking-wider uppercase">Inicio</a>
+                    @foreach(\App\Models\MenuItem::where('placement', 'header')->orderBy('order')->get() as $menu)
+                        <a href="{{ str_starts_with($menu->url, 'http') ? $menu->url : url($menu->url) }}" target="{{ $menu->target }}" class="text-gray-600 hover:text-red-600 transition-colors text-xs font-bold tracking-wider uppercase">{{ $menu->name }}</a>
+                    @endforeach
+                </nav>
 
-                    <!-- Mobile Menu Button -->
-                    <div class="flex items-center md:hidden">
-                        <button @click="mobileMenuOpen = !mobileMenuOpen" class="text-gray-500 hover:text-red-600 focus:outline-none p-2">
-                            <svg class="h-6 w-6" x-show="!mobileMenuOpen" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                            </svg>
-                            <svg class="h-6 w-6" x-cloak x-show="mobileMenuOpen" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
+                <!-- CTA Button -->
+                <div class="hidden md:flex items-center gap-4">
+                    <a href="{{ route('home') }}#proximos-eventos" class="bg-red-600 text-white hover:bg-red-700 transition-colors px-6 py-2.5 rounded-full text-xs font-bold uppercase shadow-sm flex items-center gap-2 hover:-translate-y-0.5">
+                        <span class="material-symbols-outlined text-[18px]">event</span>
+                        Eventos
+                    </a>
                 </div>
+
+                <!-- Mobile Menu Button -->
+                <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden text-gray-900 p-2 focus:outline-none">
+                    <span class="material-symbols-outlined" x-show="!mobileMenuOpen">menu</span>
+                    <span class="material-symbols-outlined" x-show="mobileMenuOpen" x-cloak>close</span>
+                </button>
             </div>
 
             <!-- Mobile Menu Dropdown -->
@@ -70,6 +69,10 @@
                     @foreach(\App\Models\MenuItem::where('placement', 'header')->orderBy('order')->get() as $menu)
                         <a href="{{ str_starts_with($menu->url, 'http') ? $menu->url : url($menu->url) }}" target="{{ $menu->target }}" class="block px-3 py-4 text-sm font-bold text-gray-900 border-b border-gray-50 uppercase tracking-widest hover:bg-gray-50 hover:text-red-600 transition-colors">{{ $menu->name }}</a>
                     @endforeach
+                    <a href="{{ route('home') }}#proximos-eventos" class="block px-3 py-4 text-sm font-bold text-red-600 border-b border-gray-50 uppercase tracking-widest hover:bg-gray-50 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px]">event</span>
+                        Eventos
+                    </a>
                 </div>
             </div>
         </header>
