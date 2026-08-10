@@ -60,22 +60,6 @@
                         <input type="url" wire:model="google_maps_url" placeholder="https://maps.google.com/..." class="w-full rounded-xl border-gray-200 bg-gray-50 shadow-sm focus:border-red-600 focus:ring-red-600 font-bold p-3">
                     </div>
                 </div>
-
-                <div class="mt-6 border-t border-gray-100 pt-6">
-                    <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Archivo de Ruta (GPX / KMZ)</label>
-                    <div class="flex items-center space-x-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
-                        <div class="flex-1">
-                            <input type="file" wire:model="route_map_file" accept=".gpx,.kmz,.kml" class="w-full text-sm font-bold text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-red-50 file:text-red-700 hover:file:bg-red-100">
-                            <p class="text-[10px] text-gray-400 mt-1 font-bold uppercase tracking-widest">Sube un archivo para mostrar el mapa del recorrido en el detalle del evento.</p>
-                        </div>
-                        @if($existing_route_map_file && !$route_map_file)
-                            <div class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-lg">
-                                Archivo actual: {{ basename($existing_route_map_file) }}
-                            </div>
-                        @endif
-                    </div>
-                    @error('route_map_file') <span class="text-red-500 text-[10px] font-bold block mt-1">{{ $message }}</span> @enderror
-                </div>
             </div>
 
             <div class="bg-blue-50/50 p-8 rounded-2xl border border-blue-100">
@@ -277,39 +261,6 @@
                         </div>
                     @endif
                 @endif
-                </div>
-            </div>
-
-            <!-- Instagram Integration -->
-            <div class="bg-pink-50/50 p-8 rounded-2xl border border-pink-100">
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center">
-                        <div class="p-2 bg-pink-100 rounded-lg mr-3">
-                            <svg class="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        </div>
-                        <h3 class="text-lg font-black text-pink-900">Galería de Instagram</h3>
-                    </div>
-                    <button type="button" wire:click="addInstagramUrl" class="text-xs font-bold text-pink-600 hover:text-pink-700 flex items-center bg-white px-3 py-1.5 rounded-lg border border-pink-200 shadow-sm">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                        Añadir Publicación
-                    </button>
-                </div>
-
-                <div class="space-y-3">
-                    @foreach($instagram_urls as $index => $url)
-                        <div class="flex items-center gap-3">
-                            <input type="url" wire:model="instagram_urls.{{ $index }}" placeholder="https://www.instagram.com/p/..." class="flex-1 rounded-lg border-pink-200 bg-white shadow-sm focus:border-pink-500 focus:ring-pink-500 font-medium p-3 text-sm">
-                            <button type="button" wire:click="removeInstagramUrl({{ $index }})" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors bg-white border border-red-100">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                            </button>
-                        </div>
-                        @error('instagram_urls.'.$index) <span class="text-red-500 text-[10px] font-bold block mt-1">{{ $message }}</span> @enderror
-                    @endforeach
-                    @if(empty($instagram_urls))
-                        <p class="text-[10px] text-pink-500 font-bold uppercase tracking-widest bg-white p-4 rounded-xl text-center border border-pink-100">
-                            Añade URLs de publicaciones o Reels de Instagram para mostrarlos en el detalle del evento.
-                        </p>
-                    @endif
                 </div>
             </div>
         </div>

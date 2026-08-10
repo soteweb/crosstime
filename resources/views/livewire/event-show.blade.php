@@ -70,34 +70,6 @@
                     </div>
                 </div>
 
-                <!-- Route Map -->
-                @if($event->route_map_file)
-                <div class="bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
-                    <h2 class="text-xl font-black text-gray-900 mb-8 uppercase tracking-tighter flex items-center">
-                        <span class="w-2 h-6 bg-red-600 rounded-full mr-3"></span>
-                        Mapa del Recorrido
-                    </h2>
-                    <div wire:ignore id="map" class="w-full h-96 rounded-2xl bg-gray-100 border border-gray-200 z-0 relative"></div>
-                </div>
-                @endif
-
-                <!-- Instagram Gallery -->
-                @if($event->instagram_urls && count($event->instagram_urls) > 0)
-                <div class="bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
-                    <h2 class="text-xl font-black text-gray-900 mb-8 uppercase tracking-tighter flex items-center">
-                        <span class="w-2 h-6 bg-pink-600 rounded-full mr-3"></span>
-                        Galería
-                    </h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        @foreach($event->instagram_urls as $url)
-                            <div wire:ignore class="flex justify-center rounded-2xl overflow-hidden bg-gray-50 border border-gray-100">
-                                <blockquote class="instagram-media" data-instgrm-permalink="{{ $url }}" data-instgrm-version="14" style=" background:#FFF; border:0; margin: 1px; max-width:540px; min-width:326px; padding:0; width:99.375%; width:-webkit-calc(100% - 2px); width:calc(100% - 2px);"></blockquote>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-                @endif
-
                 <!-- Distances & Categories -->
                 @if($event->distances->count() > 0)
                 <div class="space-y-6">
@@ -308,66 +280,3 @@
         </div>
     </div>
 </div>
-
-@push('scripts')
-    @if($event->route_map_file)
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.7.0/gpx.min.js"></script>
-        <!-- For KMZ -->
-        <script src="https://unpkg.com/leaflet-kmz@latest/dist/leaflet-kmz.js"></script>
-        <script>
-            document.addEventListener('livewire:initialized', () => {
-                // Try initializing map, wait a bit for DOM to be ready
-                setTimeout(() => {
-                    var mapContainer = document.getElementById('map');
-                    if(mapContainer && !mapContainer._leaflet_id) {
-                        var map = L.map('map');
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            attribution: '&copy; OpenStreetMap'
-                        }).addTo(map);
-
-                        var mapFile = '{{ asset('storage/' . $event->route_map_file) }}';
-                        var ext = mapFile.split('.').pop().toLowerCase();
-
-                        if (ext === 'gpx') {
-                            new L.GPX(mapFile, {
-                                async: true,
-                                marker_options: {
-                                    startIconUrl: 'https://unpkg.com/leaflet-gpx/pin-icon-start.png',
-                                    endIconUrl: 'https://unpkg.com/leaflet-gpx/pin-icon-end.png',
-                                    shadowUrl: 'https://unpkg.com/leaflet-gpx/pin-shadow.png'
-                                }
-                            }).on('loaded', function(e) {
-                                map.fitBounds(e.target.getBounds());
-                            }).addTo(map);
-                        } else if (ext === 'kmz' || ext === 'kml') {
-                            var kmz = L.kmzLayer().addTo(map);
-                            kmz.on('load', function(e) {
-                                var bounds = e.layer.getBounds();
-                                if(bounds.isValid()) {
-                                   map.fitBounds(bounds);
-                                }
-                            });
-                            kmz.load(mapFile);
-                        } else {
-                            // default view if not recognized
-                            map.setView([-27.3305, -55.8667], 13);
-                        }
-                    }
-                }, 100);
-            });
-        </script>
-    @endif
-
-    @if($event->instagram_urls && count($event->instagram_urls) > 0)
-        <script async src="//www.instagram.com/embed.js"></script>
-        <script>
-            document.addEventListener('livewire:navigated', () => {
-                if (window.instgrm) {
-                    window.instgrm.Embeds.process();
-                }
-            });
-        </script>
-    @endif
-@endpush

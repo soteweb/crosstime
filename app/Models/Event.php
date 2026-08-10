@@ -26,16 +26,13 @@ class Event extends Model
         'start_time',
         'slug',
         'organizer',
-        'results_url',
-        'route_map_file',
-        'instagram_urls'
+        'results_url'
     ];
 
     protected $casts = [
         'date' => 'date',
         'registration_settings' => 'array',
         'registration_deadline' => 'datetime',
-        'instagram_urls' => 'array',
     ];
 
     public function categories()

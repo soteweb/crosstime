@@ -21,9 +21,6 @@ class EventEditor extends Component
     public $description = '';
     public $featured_image;
     public $existing_featured_image;
-    public $route_map_file;
-    public $existing_route_map_file;
-    public $instagram_urls = [];
     public $date = '';
     public $location_address = '';
     public $event_type_id = '';
@@ -56,8 +53,6 @@ class EventEditor extends Component
             $this->title = $e->title;
             $this->description = $e->description;
             $this->existing_featured_image = $e->featured_image;
-            $this->existing_route_map_file = $e->route_map_file;
-            $this->instagram_urls = $e->instagram_urls ?? [];
             $this->date = $e->date ? $e->date->format('Y-m-d') : '';
             $this->location_address = $e->location_address;
             $this->event_type_id = $e->event_type_id;
@@ -109,17 +104,6 @@ class EventEditor extends Component
         $this->distances[] = ['id' => null, 'name' => ''];
     }
 
-    public function addInstagramUrl()
-    {
-        $this->instagram_urls[] = '';
-    }
-
-    public function removeInstagramUrl($index)
-    {
-        unset($this->instagram_urls[$index]);
-        $this->instagram_urls = array_values($this->instagram_urls);
-    }
-
     public function removeDistance($index)
     {
         unset($this->distances[$index]);
@@ -161,9 +145,6 @@ class EventEditor extends Component
             'distances.*.name' => 'required_if:registration_type,local|string|max:255',
             'categories.*.name' => 'required_if:registration_type,local|string|max:255',
             'categories.*.price' => 'required_if:registration_type,local|numeric|min:0',
-            'route_map_file' => 'nullable|file|max:10240', // max 10MB (mimes logic often tricky with gpx/kmz so relying on extension/file)
-            'instagram_urls' => 'nullable|array',
-            'instagram_urls.*' => 'nullable|url',
         ];
 
         $this->validate($rules);
@@ -173,17 +154,10 @@ class EventEditor extends Component
             $imagePath = $this->featured_image->store('events', 'public');
         }
 
-        $routeMapPath = $this->existing_route_map_file;
-        if ($this->route_map_file) {
-            $routeMapPath = $this->route_map_file->store('maps', 'public');
-        }
-
         $data = [
             'title' => $this->title,
             'description' => $this->description,
             'featured_image' => $imagePath,
-            'route_map_file' => $routeMapPath,
-            'instagram_urls' => array_values(array_filter($this->instagram_urls)),
             'date' => $this->date,
             'location_address' => $this->location_address,
             'latitude' => -27.3305, 
