@@ -9,6 +9,7 @@ use App\Models\Registration;
 class EventInscribedList extends Component
 {
     public Event $event;
+    public $categoryId = '';
 
     public function mount(Event $event)
     {
@@ -22,13 +23,18 @@ class EventInscribedList extends Component
 
     public function render()
     {
-        $registrations = Registration::with(['athlete', 'category'])
-            ->where('event_id', $this->event->id)
-            ->orderBy('created_at', 'asc')
-            ->get();
+        $query = Registration::with(['athlete', 'category'])
+            ->where('event_id', $this->event->id);
+
+        if ($this->categoryId) {
+            $query->where('event_category_id', $this->categoryId);
+        }
+
+        $registrations = $query->orderBy('created_at', 'asc')->get();
 
         return view('livewire.event-inscribed-list', [
-            'registrations' => $registrations
+            'registrations' => $registrations,
+            'categories' => $this->event->categories
         ])->layout('components.layouts.app', ['title' => 'Listado de Inscriptos - ' . $this->event->title]);
     }
 }

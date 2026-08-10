@@ -6,14 +6,30 @@
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 Volver al Evento
             </a>
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <div>
+            <div class="flex flex-col md:flex-row justify-between gap-4">
+                <div class="md:self-end">
                     <h1 class="text-4xl font-bold text-gray-900 leading-tight">Listado de Inscriptos</h1>
                     <p class="text-xl text-gray-500 font-medium">{{ $event->title }}</p>
                 </div>
-                <div class="bg-white px-6 py-3 rounded-2xl shadow-sm border border-gray-100">
-                    <span class="block text-xs font-bold text-gray-400 uppercase tracking-widest">Total Participantes</span>
-                    <span class="text-2xl font-bold text-red-600">{{ $registrations->count() }}</span>
+                <div class="flex flex-col items-end gap-3">
+                    <div class="bg-white px-6 py-3 rounded-2xl shadow-sm border border-gray-100 w-full min-w-[220px]">
+                        <span class="block text-xs font-bold text-gray-400 uppercase tracking-widest">Total Participantes</span>
+                        <span class="text-2xl font-bold text-red-600">
+                            {{ $registrations->count() }} 
+                            @if($categoryId) 
+                                <span class="text-sm font-medium text-gray-400 lowercase">en categoría</span>
+                            @endif
+                        </span>
+                    </div>
+                    
+                    <div class="w-full">
+                        <select wire:model.live="categoryId" class="w-full border-gray-200 rounded-xl shadow-sm text-sm font-bold text-gray-700 focus:ring-red-500 focus:border-red-500 transition-colors uppercase cursor-pointer">
+                            <option value="">Todas las categorías</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>
