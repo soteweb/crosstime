@@ -38,6 +38,8 @@ Route::middleware(['auth'])->prefix('admin')->group(function() {
         // Rutas que ya tenían validación interna, pero las agrupamos por limpieza
         Route::get('/finanzas', \App\Livewire\Admin\FinanceReport::class)->name('admin.finance');
         Route::get('/usuarios', \App\Livewire\Admin\UsersAdmin::class)->name('admin.users');
+        Route::get('/backup', \App\Livewire\Admin\BackupAdmin::class)->name('admin.backup');
+        Route::get('/backup/download', [\App\Http\Controllers\Admin\BackupController::class, 'download'])->name('admin.backup.download');
 
         // TinyMCE image upload endpoint
         Route::post('/upload-image', function (\Illuminate\Http\Request $request) {
