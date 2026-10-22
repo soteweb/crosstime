@@ -13,7 +13,10 @@ class MisionesCopaDonPedroSeeder extends Seeder
     public function run(): void
     {
         // 1. Tipo de evento
-        $eventType = EventType::firstOrCreate(['name' => 'Ciclismo']);
+        $eventType = EventType::firstOrCreate(
+            ['slug' => 'ciclismo'],
+            ['name' => 'Ciclismo', 'color' => '#ef4444']
+        );
 
         // 2. Crear o actualizar Evento
         $event = Event::updateOrCreate(
