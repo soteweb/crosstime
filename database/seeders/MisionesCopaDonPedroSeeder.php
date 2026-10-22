@@ -4,137 +4,79 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Event;
-use App\Models\EventType;
 use App\Models\EventDistance;
 use App\Models\EventCategory;
 use App\Models\Athlete;
 use App\Models\Registration;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class MisionesCopaDonPedroSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Tipo de evento
-        $eventType = EventType::firstOrCreate(
-            ['slug' => 'ciclismo'],
-            ['name' => 'Ciclismo', 'color' => '#ef4444']
-        );
+        // 1. Eliminar el evento duplicado si existiera
+        $duplicateEvent = Event::where('slug', 'encuentro-ciclistas-misiones-copa-don-pedro')->first();
+        if ($duplicateEvent) {
+            Registration::where('event_id', $duplicateEvent->id)->delete();
+            $duplicateEvent->categories()->delete();
+            $duplicateEvent->distances()->delete();
+            $duplicateEvent->delete();
+            $this->command->info('🗑️ Evento duplicado "encuentro-ciclistas-misiones-copa-don-pedro" eliminado con éxito.');
+        }
 
-        // 2. Crear o actualizar Evento
-        $event = Event::updateOrCreate(
-            ['slug' => 'encuentro-ciclistas-misiones-copa-don-pedro'],
-            [
-                'title' => 'Encuentro de Ciclistas en Misiones | Copa Don Pedro',
-                'description' => '🏆 Final del Campeonato - Copa Don Pedro. Evento oficial organizado por Team Aventure y Círculo Misionense. Sede: La Floresta Hotel.',
-                'date' => '2026-10-25',
-                'start_time' => '08:30:00',
-                'location_address' => 'La Floresta Hotel, San Ignacio, Misiones',
-                'organizer' => 'Team Aventure & Círculo Misionense',
-                'event_type_id' => $eventType->id,
-                'is_active' => true,
-                'registration_type' => 'internal',
-                'payment_instructions' => "<p><strong>Titular:</strong> ITAPUA CROSS EAS &mdash; <strong>RUC:</strong> 80142717-7</p>
-<p><strong>ueno bank:</strong> Caja de Ahorro: 6191647271</p>
-<p><strong>Giros Tigo:</strong> 0985-724233</p>
-<p><strong>Tarifa Única:</strong> Gs. 120.000</p>
-<p>Una vez efectuada tu transferencia o giro de Gs. 120.000, guarda tu comprobante de pago para presentarlo en la acreditación.</p>",
-            ]
-        );
+        // 2. Localizar el evento ORIGINAL oficial
+        $realEvent = Event::where('slug', 'encuentro-de-ciclistas-copa-don-pedro-4ta-edicion')->first();
+        if (!$realEvent) {
+            $realEvent = Event::find(57);
+        }
+        if (!$realEvent) {
+            $realEvent = Event::where('title', 'like', '%COPA DON PEDRO%')->first();
+        }
 
-        // 3. Distancias (updateOrCreate para no romper relaciones existentes)
-        $dist27 = EventDistance::updateOrCreate(
-            ['event_id' => $event->id, 'name' => '27 KM (Promocional)']
-        );
+        if (!$realEvent) {
+            $this->command->error('❌ No se encontró el evento oficial "ENCUENTRO DE CICLISTAS - COPA DON PEDRO 4TA. EDICION".');
+            return;
+        }
 
-        $dist50 = EventDistance::updateOrCreate(
-            ['event_id' => $event->id, 'name' => '50 KM (Principal / Elite)']
-        );
+        $this->command->info("🎯 Evento oficial identificado: [ID {$realEvent->id}] {$realEvent->title}");
 
-        $price = 120000;
+        // 3. Helper para buscar la categoría correspondiente en el evento oficial
+        $findCategory = function($event, $distKm, $gender, $keyword) {
+            // Distancia que coincida con 50 o 27
+            $distance = $event->distances()
+                ->where('name', 'like', "%{$distKm}%")
+                ->first();
 
-        // 4. Categorías para 27 KM (Masculino y Femenino)
-        $cats27 = [
-            ['name' => '27KM - Juvenil (12 a 18 años)', 'min' => 12, 'max' => 18],
-            ['name' => '27KM - -30 (hasta 29 años)', 'min' => 19, 'max' => 29],
-            ['name' => '27KM - +30 (30 a 39 años)', 'min' => 30, 'max' => 39],
-            ['name' => '27KM - +40 (40 a 49 años)', 'min' => 40, 'max' => 49],
-            ['name' => '27KM - +50 (50 años en adelante)', 'min' => 50, 'max' => 99],
-        ];
-
-        foreach (['M', 'F'] as $gender) {
-            foreach ($cats27 as $c) {
-                EventCategory::updateOrCreate(
-                    [
-                        'event_id' => $event->id,
-                        'name' => $c['name'] . ' ' . ($gender === 'M' ? 'Masculino' : 'Femenino'),
-                    ],
-                    [
-                        'event_distance_id' => $dist27->id,
-                        'price' => $price,
-                        'min_age' => $c['min'],
-                        'max_age' => $c['max'],
-                        'gender_restriction' => $gender,
-                    ]
-                );
+            $query = EventCategory::where('event_id', $event->id);
+            if ($distance) {
+                $query->where('event_distance_id', $distance->id);
             }
-        }
+            if ($gender) {
+                $query->where(function($q) use ($gender) {
+                    $q->where('gender_restriction', $gender)
+                      ->orWhereNull('gender_restriction');
+                });
+            }
 
-        // 5. Categorías para 50 KM Masculino
-        $cats50M = [
-            ['name' => '50KM - Sub23 (19 a 22 años)', 'min' => 19, 'max' => 22],
-            ['name' => '50KM - Elite (23 años en adelante)', 'min' => 23, 'max' => 99],
-            ['name' => '50KM - Open (23 a 34 años)', 'min' => 23, 'max' => 34],
-            ['name' => '50KM - Master A (35 a 39 años)', 'min' => 35, 'max' => 39],
-            ['name' => '50KM - Master B (40 a 49 años)', 'min' => 40, 'max' => 49],
-            ['name' => '50KM - Master C (50 años en adelante)', 'min' => 50, 'max' => 99],
-        ];
+            $categories = $query->get();
+            foreach ($categories as $cat) {
+                if (stripos($cat->name, $keyword) !== false) {
+                    return [$cat, $distance ?? $cat->distance];
+                }
+            }
 
-        foreach ($cats50M as $c) {
-            EventCategory::updateOrCreate(
-                [
-                    'event_id' => $event->id,
-                    'name' => $c['name'] . ' Masculino',
-                ],
-                [
-                    'event_distance_id' => $dist50->id,
-                    'price' => $price,
-                    'min_age' => $c['min'],
-                    'max_age' => $c['max'],
-                    'gender_restriction' => 'M',
-                ]
-            );
-        }
+            // Búsqueda más amplia por si las restricciones de género difieren
+            $fallbackCat = EventCategory::where('event_id', $event->id)
+                ->where('name', 'like', "%{$keyword}%")
+                ->first();
 
-        // 6. Categorías para 50 KM Femenino
-        $cats50F = [
-            ['name' => '50KM - Sub23 (19 a 22 años)', 'min' => 19, 'max' => 22],
-            ['name' => '50KM - Elite (23 años en adelante)', 'min' => 23, 'max' => 99],
-            ['name' => '50KM - Open (23 a 34 años)', 'min' => 23, 'max' => 34],
-            ['name' => '50KM - Master A (35 a 39 años)', 'min' => 35, 'max' => 39],
-            ['name' => '50KM - Master B (40 a 49 años)', 'min' => 40, 'max' => 49],
-        ];
+            return [$fallbackCat, $fallbackCat ? ($distance ?? $fallbackCat->distance) : null];
+        };
 
-        foreach ($cats50F as $c) {
-            EventCategory::updateOrCreate(
-                [
-                    'event_id' => $event->id,
-                    'name' => $c['name'] . ' Femenino',
-                ],
-                [
-                    'event_distance_id' => $dist50->id,
-                    'price' => $price,
-                    'min_age' => $c['min'],
-                    'max_age' => $c['max'],
-                    'gender_restriction' => 'F',
-                ]
-            );
-        }
-
-        // 7. Atletas e Inscripciones del HTML
+        // 4. Datos de los 8 atletas
         $athletesData = [
             [
-                'dorsal' => '8',
                 'ci' => '6027066',
                 'name' => 'Cristhian',
                 'last_name' => 'Centurión',
@@ -146,16 +88,12 @@ class MisionesCopaDonPedroSeeder extends Seeder
                 'country' => 'Paraguay',
                 'blood_type' => 'O+',
                 'club' => 'Club de ciclistas roseños',
-                'distance_name' => '50 KM (Principal / Elite)',
-                'category_name' => '50KM - Open (23 a 34 años) Masculino',
-                'payment_status' => 'pending',
-                'payment_method' => 'Transferencia',
-                'status' => 'pre_inscribed',
-                'registration_date' => '2026-10-22 15:44:00',
+                'dist_km' => '50',
+                'cat_keyword' => 'OPEN',
                 'observation' => null,
+                'registration_date' => '2026-10-22 15:44:00',
             ],
             [
-                'dorsal' => '7',
                 'ci' => '5166495',
                 'name' => 'Fabian',
                 'last_name' => 'Llano',
@@ -167,16 +105,12 @@ class MisionesCopaDonPedroSeeder extends Seeder
                 'country' => 'Paraguay',
                 'blood_type' => 'O+',
                 'club' => 'Team Aventure',
-                'distance_name' => '50 KM (Principal / Elite)',
-                'category_name' => '50KM - Open (23 a 34 años) Masculino',
-                'payment_status' => 'pending',
-                'payment_method' => 'Transferencia',
-                'status' => 'pre_inscribed',
-                'registration_date' => '2026-10-22 15:39:00',
+                'dist_km' => '50',
+                'cat_keyword' => 'OPEN',
                 'observation' => null,
+                'registration_date' => '2026-10-22 15:39:00',
             ],
             [
-                'dorsal' => '6',
                 'ci' => '3660566',
                 'name' => 'Limpio Concepción',
                 'last_name' => 'Martinez Enrique',
@@ -188,16 +122,12 @@ class MisionesCopaDonPedroSeeder extends Seeder
                 'country' => 'Paraguay',
                 'blood_type' => 'A+',
                 'club' => 'Club Ignacionos de ciclista Cic',
-                'distance_name' => '27 KM (Promocional)',
-                'category_name' => '27KM - +30 (30 a 39 años) Masculino',
-                'payment_status' => 'pending',
-                'payment_method' => 'Transferencia',
-                'status' => 'pre_inscribed',
-                'registration_date' => '2026-10-22 15:20:00',
+                'dist_km' => '27',
+                'cat_keyword' => '+30',
                 'observation' => 'Pagado por el club Ignacianos de ciclista Cic',
+                'registration_date' => '2026-10-22 15:20:00',
             ],
             [
-                'dorsal' => '5',
                 'ci' => '6088452',
                 'name' => 'Magali',
                 'last_name' => 'Insfrán',
@@ -209,16 +139,12 @@ class MisionesCopaDonPedroSeeder extends Seeder
                 'country' => 'Paraguay',
                 'blood_type' => 'O+',
                 'club' => 'Team Aventure',
-                'distance_name' => '27 KM (Promocional)',
-                'category_name' => '27KM - -30 (hasta 29 años) Femenino',
-                'payment_status' => 'pending',
-                'payment_method' => 'Transferencia',
-                'status' => 'pre_inscribed',
-                'registration_date' => '2026-10-22 14:56:00',
+                'dist_km' => '27',
+                'cat_keyword' => '-30',
                 'observation' => null,
+                'registration_date' => '2026-10-22 14:56:00',
             ],
             [
-                'dorsal' => '4',
                 'ci' => '4537358',
                 'name' => 'Juan Brito',
                 'last_name' => 'Villalba Aguilera',
@@ -230,16 +156,12 @@ class MisionesCopaDonPedroSeeder extends Seeder
                 'country' => 'Paraguay',
                 'blood_type' => 'O+',
                 'club' => 'Team aventure',
-                'distance_name' => '27 KM (Promocional)',
-                'category_name' => '27KM - +30 (30 a 39 años) Masculino',
-                'payment_status' => 'pending',
-                'payment_method' => 'Transferencia',
-                'status' => 'pre_inscribed',
-                'registration_date' => '2026-10-22 14:52:00',
+                'dist_km' => '27',
+                'cat_keyword' => '+30',
                 'observation' => null,
+                'registration_date' => '2026-10-22 14:52:00',
             ],
             [
-                'dorsal' => '3',
                 'ci' => '4545514',
                 'name' => 'Romina del Pilar',
                 'last_name' => 'Álvarez Meza',
@@ -251,16 +173,12 @@ class MisionesCopaDonPedroSeeder extends Seeder
                 'country' => 'Paraguay',
                 'blood_type' => 'O+',
                 'club' => 'Club de Ciclistas Roseños',
-                'distance_name' => '27 KM (Promocional)',
-                'category_name' => '27KM - -30 (hasta 29 años) Femenino',
-                'payment_status' => 'pending',
-                'payment_method' => 'Transferencia',
-                'status' => 'pre_inscribed',
-                'registration_date' => '2026-10-22 14:42:00',
+                'dist_km' => '27',
+                'cat_keyword' => '-30',
                 'observation' => null,
+                'registration_date' => '2026-10-22 14:42:00',
             ],
             [
-                'dorsal' => '2',
                 'ci' => '5571156',
                 'name' => 'Nohelli',
                 'last_name' => 'Nuñez',
@@ -272,16 +190,12 @@ class MisionesCopaDonPedroSeeder extends Seeder
                 'country' => 'Paraguay',
                 'blood_type' => 'O+',
                 'club' => 'Team Aventure SJB',
-                'distance_name' => '50 KM (Principal / Elite)',
-                'category_name' => '50KM - Elite (23 años en adelante) Femenino',
-                'payment_status' => 'pending',
-                'payment_method' => 'Transferencia',
-                'status' => 'pre_inscribed',
-                'registration_date' => '2026-10-22 14:29:00',
+                'dist_km' => '50',
+                'cat_keyword' => 'ELITE',
                 'observation' => null,
+                'registration_date' => '2026-10-22 14:29:00',
             ],
             [
-                'dorsal' => '1',
                 'ci' => '3613708',
                 'name' => 'DERLIS',
                 'last_name' => 'VARGAS',
@@ -293,18 +207,15 @@ class MisionesCopaDonPedroSeeder extends Seeder
                 'country' => 'Paraguay',
                 'blood_type' => null,
                 'club' => null,
-                'distance_name' => '50 KM (Principal / Elite)',
-                'category_name' => '50KM - Master B (40 a 49 años) Masculino',
-                'payment_status' => 'pending',
-                'payment_method' => 'Transferencia',
-                'status' => 'pre_inscribed',
-                'registration_date' => '2026-10-22 14:26:00',
+                'dist_km' => '50',
+                'cat_keyword' => 'MASTER B',
                 'observation' => null,
+                'registration_date' => '2026-10-22 14:26:00',
             ],
         ];
 
         foreach ($athletesData as $data) {
-            // Unificar por CI para no duplicar si el atleta ya existe en la BD histórica
+            // Actualizar o crear atleta por Cédula (no duplicar)
             $athlete = Athlete::updateOrCreate(
                 ['identity_document' => $data['ci']],
                 [
@@ -321,38 +232,52 @@ class MisionesCopaDonPedroSeeder extends Seeder
                 ]
             );
 
-            // Obtener la categoría y distancia en la base de datos
-            $cat = EventCategory::where('event_id', $event->id)
-                ->where('name', $data['category_name'])
+            // Verificar si ya está inscripto en el evento oficial
+            $existingReg = Registration::where('event_id', $realEvent->id)
+                ->where('athlete_id', $athlete->id)
                 ->first();
 
-            $dist = EventDistance::where('event_id', $event->id)
-                ->where('name', $data['distance_name'])
-                ->first();
+            [$category, $distance] = $findCategory($realEvent, $data['dist_km'], $data['gender'], $data['cat_keyword']);
 
-            $regDate = Carbon::parse($data['registration_date']);
+            if ($existingReg) {
+                // Ya estaba inscripto, preservamos su dorsal original y actualizamos observación si la hubiera
+                if (!empty($data['observation'])) {
+                    $existingReg->update(['observation' => $data['observation']]);
+                }
+                $this->command->info("ℹ️ {$data['name']} {$data['last_name']} ya estaba inscripto en el evento oficial (Dorsal #{$existingReg->bib_number}).");
+            } else {
+                // Calcular el siguiente dorsal correlativo disponible en el evento oficial
+                $maxBib = Registration::where('event_id', $realEvent->id)
+                    ->get()
+                    ->map(function ($r) {
+                        return is_numeric($r->bib_number) ? (int)$r->bib_number : 0;
+                    })
+                    ->max();
 
-            // Crear o actualizar la inscripción
-            Registration::updateOrCreate(
-                [
-                    'event_id' => $event->id,
+                $nextBib = ($maxBib ?? 0) + 1;
+                $regDate = Carbon::parse($data['registration_date']);
+
+                Registration::create([
+                    'event_id' => $realEvent->id,
+                    'event_category_id' => $category ? $category->id : null,
+                    'event_distance_id' => $distance ? $distance->id : ($category ? $category->event_distance_id : null),
                     'athlete_id' => $athlete->id,
-                ],
-                [
-                    'event_category_id' => $cat ? $cat->id : null,
-                    'event_distance_id' => $dist ? $dist->id : ($cat ? $cat->event_distance_id : null),
-                    'bib_number' => $data['dorsal'],
-                    'payment_status' => $data['payment_status'],
-                    'status' => $data['status'],
-                    'payment_method' => $data['payment_method'],
+                    'bib_number' => (string)$nextBib,
+                    'payment_status' => 'pending',
+                    'status' => 'pre_inscribed',
+                    'payment_method' => 'Transferencia',
                     'observation' => $data['observation'],
                     'waiver_accepted_at' => $regDate,
                     'created_at' => $regDate,
                     'updated_at' => $regDate,
-                ]
-            );
+                ]);
+
+                $catName = $category ? $category->name : 'N/A';
+                $this->command->info("✅ Inscripto con éxito: {$data['name']} {$data['last_name']} -> Dorsal #{$nextBib} en categoría {$catName}");
+            }
         }
 
-        $this->command->info('✅ Evento "Copa Don Pedro" y sus 8 atletas inscriptos han sido cargados con éxito.');
+        $total = Registration::where('event_id', $realEvent->id)->count();
+        $this->command->info("🏁 Proceso finalizado. Total de inscriptos en el evento oficial: {$total}");
     }
 }
