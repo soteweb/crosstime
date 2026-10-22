@@ -37,7 +37,7 @@ class EventAdmin extends Component
     public function render()
     {
         $events = Event::with(['categories', 'eventType'])
-            ->where('title', 'ilike', '%' . $this->search . '%')
+            ->where('title', 'like', '%' . $this->search . '%')
             ->orderBy('date', 'desc')
             ->paginate(20);
 

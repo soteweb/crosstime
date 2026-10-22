@@ -46,7 +46,7 @@ class ImportWPEvents extends Command
             $title = html_entity_decode(strip_tags($post['title']['rendered']));
             
             // Si el titulo ya existe (de los seeders) lo evitamos
-            if (Event::where('title', 'ilike', "%{$title}%")->exists()) {
+            if (Event::where('title', 'like', "%{$title}%")->exists()) {
                 $this->warn("El evento '{$title}' ya existe en la base de datos local. Saltando...");
                 continue;
             }

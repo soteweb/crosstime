@@ -81,7 +81,7 @@ class CheckIn extends Component
         // 1. Events List
         $eventsQuery = Event::query()->orderBy('date', 'desc');
         if ($this->eventSearchTerm) {
-            $eventsQuery->where('title', 'ilike', '%' . $this->eventSearchTerm . '%');
+            $eventsQuery->where('title', 'like', '%' . $this->eventSearchTerm . '%');
         }
         $events = $eventsQuery->take(15)->get();
 
@@ -91,9 +91,9 @@ class CheckIn extends Component
             $searchResults = Registration::with(['athlete', 'category', 'distance'])
                 ->where('event_id', $this->selected_event_id)
                 ->whereHas('athlete', function($q) {
-                    $q->where('name', 'ilike', '%'.$this->athleteSearchTerm.'%')
-                      ->orWhere('last_name', 'ilike', '%'.$this->athleteSearchTerm.'%')
-                      ->orWhere('identity_document', 'ilike', '%'.$this->athleteSearchTerm.'%');
+                    $q->where('name', 'like', '%'.$this->athleteSearchTerm.'%')
+                      ->orWhere('last_name', 'like', '%'.$this->athleteSearchTerm.'%')
+                      ->orWhere('identity_document', 'like', '%'.$this->athleteSearchTerm.'%');
                 })
                 ->take(10)
                 ->get();

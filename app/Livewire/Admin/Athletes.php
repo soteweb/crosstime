@@ -655,10 +655,10 @@ class Athletes extends Component
         if ($this->search) {
             $query->where(function($q) {
                 $q->whereHas('athlete', function($inner) {
-                    $inner->where('name', 'ilike', '%'.$this->search.'%')
-                          ->orWhere('last_name', 'ilike', '%'.$this->search.'%')
-                          ->orWhere('identity_document', 'ilike', '%'.$this->search.'%');
-                })->orWhere('bib_number', 'ilike', '%'.$this->search.'%');
+                    $inner->where('name', 'like', '%'.$this->search.'%')
+                          ->orWhere('last_name', 'like', '%'.$this->search.'%')
+                          ->orWhere('identity_document', 'like', '%'.$this->search.'%');
+                })->orWhere('bib_number', 'like', '%'.$this->search.'%');
             });
         }
 
@@ -679,7 +679,7 @@ class Athletes extends Component
 
         $registrationEvents = \App\Models\Event::where('is_active', true)
             ->when($this->registrationEventSearchTerm, function($q) {
-                $q->where('title', 'ilike', '%'.$this->registrationEventSearchTerm.'%');
+                $q->where('title', 'like', '%'.$this->registrationEventSearchTerm.'%');
             })->orderBy('date', 'desc')->get();
 
         $selectedEvent = $this->selected_event_id ? \App\Models\Event::find($this->selected_event_id) : null;
@@ -706,9 +706,9 @@ class Athletes extends Component
             $athletesQuery = \App\Models\Athlete::query();
             if ($this->search) {
                 $athletesQuery->where(function($q) {
-                    $q->where('name', 'ilike', '%'.$this->search.'%')
-                      ->orWhere('last_name', 'ilike', '%'.$this->search.'%')
-                      ->orWhere('identity_document', 'ilike', '%'.$this->search.'%');
+                    $q->where('name', 'like', '%'.$this->search.'%')
+                      ->orWhere('last_name', 'like', '%'.$this->search.'%')
+                      ->orWhere('identity_document', 'like', '%'.$this->search.'%');
                 });
             }
             $athletesMaster = $athletesQuery->orderBy('last_name')->paginate(20);
@@ -725,10 +725,10 @@ class Athletes extends Component
             if ($this->search) {
                 $checkinQuery->where(function($q) {
                     $q->whereHas('athlete', function($inner) {
-                        $inner->where('name', 'ilike', '%'.$this->search.'%')
-                              ->orWhere('last_name', 'ilike', '%'.$this->search.'%')
-                              ->orWhere('identity_document', 'ilike', '%'.$this->search.'%');
-                    })->orWhere('bib_number', 'ilike', '%'.$this->search.'%');
+                        $inner->where('name', 'like', '%'.$this->search.'%')
+                              ->orWhere('last_name', 'like', '%'.$this->search.'%')
+                              ->orWhere('identity_document', 'like', '%'.$this->search.'%');
+                    })->orWhere('bib_number', 'like', '%'.$this->search.'%');
                 });
             }
 

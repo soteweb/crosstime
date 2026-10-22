@@ -25,7 +25,7 @@ class FinanceReport extends Component
     {
         $eventsQuery = Event::orderBy('date', 'desc');
         if ($this->eventSearchTerm) {
-            $eventsQuery->where('title', 'ilike', '%' . $this->eventSearchTerm . '%');
+            $eventsQuery->where('title', 'like', '%' . $this->eventSearchTerm . '%');
         }
         $events = $eventsQuery->take(15)->get();
         
